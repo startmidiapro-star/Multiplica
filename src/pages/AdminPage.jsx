@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react'
 import { getCampaignBySlug, getOrdersByCampaign, updateOrderStatus } from '../services/adminService'
 
 export default function AdminPage() {
   const { slug } = useParams()
-  const [searchParams] = useSearchParams()
   const [campaign, setCampaign] = useState(null)
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,15 +13,24 @@ export default function AdminPage() {
   const [selectedProof, setSelectedProof] = useState(null)
 
   useEffect(() => {
-    const authToken = searchParams.get('auth')
+    // Lê o token do fragmento da URL (#auth=UUID) — nunca da query string
+    // O fragmento não é enviado ao servidor pelo navegador
+    const fragmento = window.location.hash.slice(1)
+    const parametrosHash = new URLSearchParams(fragmento)
+    const authToken = parametrosHash.get('auth')
+
     if (!authToken) {
       setError('Acesso não autorizado')
       setLoading(false)
       return
     }
-    
+
+    // Remove o fragmento da URL após capturar o token
+    // Evita exposição no histórico do navegador e ferramentas de analytics
+    history.replaceState(null, '', window.location.pathname)
+
     loadData()
-  }, [slug, searchParams])
+  }, [slug])
 
   async function loadData() {
     try {

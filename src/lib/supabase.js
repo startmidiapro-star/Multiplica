@@ -2,15 +2,18 @@ import { createClient } from '@supabase/supabase-js'
 
 /**
  * Custom fetch que adiciona o header x-manager-token quando
- * o parâmetro "auth" existe na URL (para acesso do organizador).
- * O projeto não quebra se o parâmetro não existir.
+ * o fragmento "#auth=UUID" existe na URL (para acesso do organizador).
+ * O fragmento nunca é enviado ao servidor — fica apenas no cliente.
+ * O projeto não quebra se o fragmento não existir.
  */
 const createFetchWithAuthHeader = () => {
   const defaultFetch = fetch.bind(globalThis)
 
   return (url, options = {}) => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const authToken = urlParams.get('auth')
+    // Lê o token do fragmento da URL (#auth=UUID), nunca da query string
+    const fragmento = window.location.hash.slice(1)
+    const parametrosHash = new URLSearchParams(fragmento)
+    const authToken = parametrosHash.get('auth')
 
     const headers = new Headers(options.headers || {})
     if (authToken) {
