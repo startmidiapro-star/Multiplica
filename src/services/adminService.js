@@ -1,0 +1,38 @@
+import { supabase } from '../lib/supabase'
+
+export async function getCampaignBySlug(slug) {
+  const { data, error } = await supabase
+    .from('campaigns')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export async function getOrdersByCampaign(campaignId) {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('campaign_id', campaignId)
+    .order('created_at', { ascending: false })
+  
+  if (error) throw error
+  
+  // Ordenar por prioridade: pending_payment → approved → rejected
+  const orderPriority = { pending_payment: 1, approved: 2, rejected: 3 }
+  return data.sort((a, b) => orderPriority[a.status] - orderPriority[b.status])
+}
+
+export async function updateOrderStatus(orderId, newStatus) {
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ status: newStatus })
+    .eq('id', orderId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
