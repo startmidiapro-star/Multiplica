@@ -25,6 +25,14 @@ export default function AdminPage() {
       return
     }
 
+    // Persiste o token na sessionStorage para que requests posteriores
+    // (aprovar/rejeitar) continuem enviando x-manager-token após o hash ser limpo
+    try {
+      sessionStorage.setItem('manager_token', authToken)
+    } catch {
+      // sessionStorage indisponível — ignora
+    }
+
     // Remove o fragmento da URL após capturar o token
     // Evita exposição no histórico do navegador e ferramentas de analytics
     history.replaceState(null, '', window.location.pathname)

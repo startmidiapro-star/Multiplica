@@ -10,14 +10,34 @@ const createFetchWithAuthHeader = () => {
   const defaultFetch = fetch.bind(globalThis)
 
   return (url, options = {}) => {
-    // Lê o token do fragmento da URL (#auth=UUID), nunca da query string
-    const fragmento = window.location.hash.slice(1)
-    const parametrosHash = new URLSearchParams(fragmento)
-    const authToken = parametrosHash.get('auth')
+    // Token do admin (via hash ou sessionStorage)
+    const authToken = (() => {
+      const fragmento = window.location.hash.slice(1)
+      const params = new URLSearchParams(fragmento)
+      const hashToken = params.get('auth')
+      if (hashToken) return hashToken
+      try {
+        return sessionStorage.getItem('manager_token')
+      } catch {
+        return null
+      }
+    })()
+
+    // Order ID do comprador (via localStorage)
+    const orderId = (() => {
+      try {
+        return localStorage.getItem('multiplica_order_id')
+      } catch {
+        return null
+      }
+    })()
 
     const headers = new Headers(options.headers || {})
     if (authToken) {
       headers.set('x-manager-token', authToken)
+    }
+    if (orderId) {
+      headers.set('x-order-id', orderId)
     }
 
     return defaultFetch(url, { ...options, headers })

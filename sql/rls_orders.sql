@@ -45,11 +45,25 @@ END $$;
 --    UUID como segredo de fato (MVP aceitável).
 -- ─────────────────────────────────────────────
 DROP POLICY IF EXISTS "Comprador pode ler pedido" ON orders;
+DROP POLICY IF EXISTS "Leitura restrita de pedidos" ON orders;
 
-CREATE POLICY "Comprador pode ler pedido"
+CREATE POLICY "Leitura restrita de pedidos"
 ON orders FOR SELECT
 TO anon
-USING (true);
+USING (
+  -- Admin com token válido vê todos os pedidos da campanha
+  campaign_id IN (
+    SELECT id FROM campaigns
+    WHERE manager_token::text = (
+      current_setting('request.headers', true)::json->>'x-manager-token'
+    )
+  )
+  OR
+  -- Comprador vê apenas o próprio pedido pelo ID
+  id::text = (
+    current_setting('request.headers', true)::json->>'x-order-id'
+  )
+);
 
 -- ─────────────────────────────────────────────
 -- 5. UPDATE — restrito ao admin com token válido
