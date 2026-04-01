@@ -65,46 +65,40 @@ Não sugira o que não foi pedido. Não adicione complexidade desnecessária.
 
 Não avance para o próximo item sem confirmar que o anterior está resolvido.
 
-### Prioridade 1 — CRÍTICA: Fechar o painel admin
+### ✅ Prioridade 1 — CONCLUÍDA: Fechar o painel admin
+*(Concluída em 2026-03-31)*
 
-**Problema:** `/admin/:slug?auth=UUID` está completamente público. Qualquer pessoa com a URL acessa e pode aprovar ou rejeitar pedidos.
-
-**O que fazer:**
-- Garantir que o campo `manager_token` (UUID) existe na tabela `campaigns`
-- Implementar política RLS que restrinja `SELECT` e `UPDATE` em `orders` apenas para o portador do `manager_token` correto, recebido via header `x-manager-token`
-- Atualizar `adminService.js` para enviar o token no header — nunca na query string
-- Testar que sem o token correto o painel retorna erro e não carrega dados
-
-**Regra:** O token nunca trafega como `?auth=UUID`. Sempre via header `x-manager-token`.
+- `manager_token UUID` garantido na tabela `campaigns`
+- RLS em `orders`: SELECT restrito por token ou order_id; UPDATE restrito ao admin com token válido
+- `supabase.js`: token lido de `window.location.hash`, injetado via `x-manager-token`
+- Token persistido em `sessionStorage` para requests após limpeza do hash
+- `AdminPage.jsx`: lê hash, limpa com `history.replaceState`, bloqueia acesso sem token
+- SQL: `sql/rls_orders.sql`
 
 ---
 
-### Prioridade 2 — CRÍTICA: Tornar o storage de comprovantes privado
+### ✅ Prioridade 2 — CONCLUÍDA: Storage de comprovantes privado
+*(Concluída em 2026-03-31)*
 
-**Problema:** Bucket `comprovantes` está com leitura pública. Comprovantes de Pix contêm nome completo e dados bancários — violação direta da LGPD.
-
-**O que fazer:**
-- Alterar o bucket `comprovantes` para privado no Supabase Storage
-- Substituir a `proof_url` no banco por path relativo do arquivo
-- Criar função em `adminService.js` para gerar URL assinada com expiração (1 hora) ao abrir o modal
-- Garantir que o comprador não acessa comprovantes de outros pedidos
-
----
-
-### Prioridade 3 — ALTA: Mover token para fragmento de URL
-
-**Problema:** Mesmo com header no backend, o token ainda aparece na URL como `?auth=UUID`, ficando exposto em histórico do navegador e ferramentas de analytics.
-
-**O que fazer:**
-- Alterar o Link Mágico para usar fragmento: `/admin/:slug#auth=UUID`
-- Ler o token via `window.location.hash` no frontend
-- O fragmento nunca é enviado ao servidor (comportamento nativo do navegador)
-- Limpar o fragmento da URL após capturar o token via `history.replaceState`
+- Bucket `comprovantes` alterado para `public = false`
+- `proof_url` no banco salva path relativo — nunca URL pública
+- `adminService.js`: `gerarUrlAssinadaComprovante(path)` com expiração de 1 hora
+- `AdminPage.jsx`: URL assinada gerada ao abrir o modal, nunca antes
+- `supabase.js`: `x-order-id` injetado via localStorage para RLS do comprador
+- SQL: `sql/storage_privado.sql`
 
 ---
 
-### Prioridade 4 — MÉDIA: Refinamento de UX do comprador
-*(Só após as prioridades 1, 2 e 3 concluídas)*
+### ✅ Prioridade 3 — CONCLUÍDA: Token via fragmento de URL
+*(Concluída junto com P1 em 2026-03-31)*
+
+- Link Mágico usa `/admin/:slug#auth=UUID`
+- Token lido via `window.location.hash` — nunca da query string
+- Fragmento limpo com `history.replaceState` após captura
+
+---
+
+### 🟡 Prioridade 4 — PRÓXIMA: Refinamento de UX do comprador
 
 - Adicionar estado "Enviando..." no botão de upload — desabilitado durante o processo
 - Impedir múltiplos envios do mesmo comprovante
@@ -115,7 +109,7 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 ---
 
 ### Prioridade 5 — MÉDIA: Validação de comprovante no admin
-*(Só após as prioridades anteriores)*
+*(Só após P4 concluída)*
 
 - Impedir aprovação de pedido sem comprovante (`proof_url` nula)
 - Exibir alerta claro ao tentar aprovar sem comprovante
@@ -129,9 +123,10 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 | Item | Estado | Observação |
 |---|---|---|
 | RLS em `orders` — INSERT | ✅ OK | Aberto para anon com rate limiting |
-| RLS em `orders` — SELECT/UPDATE | ⚠️ Público temporário | Prioridade 1 |
-| Bucket `comprovantes` | 🔴 Leitura pública | Prioridade 2 |
-| Token do admin na URL | 🔴 Query string visível | Prioridade 3 |
+| RLS em `orders` — SELECT | ✅ OK | Admin via token; comprador via order_id |
+| RLS em `orders` — UPDATE | ✅ OK | Restrito ao portador do `manager_token` |
+| Bucket `comprovantes` | ✅ OK | Privado — URLs assinadas com expiração de 1h |
+| Token do admin na URL | ✅ OK | Fragmento `#auth=UUID`, limpo após captura |
 | Imutabilidade de pedidos | ✅ OK | Trigger ativo no banco |
 
 ---
@@ -147,6 +142,9 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 | Modal abrindo nova aba | Modal com overlay e imagem responsiva |
 | Polling parando | Ajuste no array de dependências do useEffect |
 | Export duplicado | Remoção do export duplo em `AdminPage.jsx` |
+| Painel admin público | RLS com `manager_token` + token via `x-manager-token` header |
+| Token exposto na query string | Fragmento `#auth=UUID` + `history.replaceState` + `sessionStorage` |
+| Comprovantes com URL pública | Bucket privado + path relativo no banco + URL assinada 1h |
 
 ---
 
