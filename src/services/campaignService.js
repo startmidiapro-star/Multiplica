@@ -92,6 +92,17 @@ export const uploadProof = async (file, orderId) => {
       return null
     }
 
+    // Salva o path relativo no banco — nunca URL pública (LGPD)
+    const { error: erroAtualizacao } = await supabase
+      .from('orders')
+      .update({ proof_url: data.path })
+      .eq('id', orderId)
+
+    if (erroAtualizacao) {
+      console.error('[campaignService] uploadProof - salvar path:', erroAtualizacao.message)
+      return null
+    }
+
     return data
   } catch (err) {
     console.error('[campaignService] uploadProof:', err)

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react'
-import { getCampaignBySlug, getOrdersByCampaign, updateOrderStatus } from '../services/adminService'
+import { getCampaignBySlug, getOrdersByCampaign, updateOrderStatus, gerarUrlAssinadaComprovante } from '../services/adminService'
 
 export default function AdminPage() {
   const { slug } = useParams()
@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [error, setError] = useState(null)
   const [actionLoading, setActionLoading] = useState(null)
   const [selectedProof, setSelectedProof] = useState(null)
+  const [loadingProof, setLoadingProof] = useState(false)
 
   useEffect(() => {
     // Lê o token do fragmento da URL (#auth=UUID) — nunca da query string
@@ -53,6 +54,20 @@ export default function AdminPage() {
       setError('Não foi possível carregar os dados')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function abrirComprovante(path) {
+    setLoadingProof(true)
+    try {
+      // Gera URL assinada com expiração de 1h — nunca expõe URL pública
+      const urlAssinada = await gerarUrlAssinadaComprovante(path)
+      setSelectedProof(urlAssinada)
+    } catch (err) {
+      console.error('Erro ao gerar URL do comprovante:', err)
+      alert('Não foi possível abrir o comprovante. Tente novamente.')
+    } finally {
+      setLoadingProof(false)
     }
   }
 
@@ -105,11 +120,12 @@ export default function AdminPage() {
 
             {order.proof_url && (
               <div className="proof-section">
-                <button 
+                <button
                   className="proof-button"
-                  onClick={() => setSelectedProof(order.proof_url)}
+                  onClick={() => abrirComprovante(order.proof_url)}
+                  disabled={loadingProof}
                 >
-                  <Eye size={18} /> Ver comprovante
+                  <Eye size={18} /> {loadingProof ? 'Carregando...' : 'Ver comprovante'}
                 </button>
               </div>
             )}

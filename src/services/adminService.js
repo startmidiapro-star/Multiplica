@@ -32,7 +32,22 @@ export async function updateOrderStatus(orderId, newStatus) {
     .eq('id', orderId)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
+}
+
+/**
+ * Gera URL assinada para visualização do comprovante.
+ * Expira em 1 hora — nunca expõe URL pública permanente.
+ * @param {string} path - Path relativo do arquivo no bucket
+ * @returns {Promise<string>} URL assinada temporária
+ */
+export async function gerarUrlAssinadaComprovante(path) {
+  const { data, error } = await supabase.storage
+    .from('comprovantes')
+    .createSignedUrl(path, 3600) // 1 hora de expiração
+
+  if (error) throw error
+  return data.signedUrl
 }
