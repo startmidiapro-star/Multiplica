@@ -32,6 +32,7 @@ const OrderPage = () => {
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [uploadError, setUploadError] = useState(false)
+  const [uploadedAt, setUploadedAt] = useState(null)
 
   useEffect(() => {
     if (slug) fetchCampaign(slug)
@@ -42,6 +43,13 @@ const OrderPage = () => {
       pixRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [showPix])
+
+  // Erro de upload desaparece após 3 segundos
+  useEffect(() => {
+    if (!uploadError) return
+    const timer = setTimeout(() => setUploadError(false), 3000)
+    return () => clearTimeout(timer)
+  }, [uploadError])
 
   const onGerarPix = () => generatePix()
 
@@ -212,30 +220,38 @@ const OrderPage = () => {
           )}
         </div>
 
-        {/* Upload de comprovante - apenas quando pending_payment E showPix */}
-        {orderStatus === 'pending_payment' && showPix && (
+        {/* Upload de comprovante - apenas quando pending_payment, showPix e ainda não enviou */}
+        {orderStatus === 'pending_payment' && showPix && !uploadSuccess && (
           <div className="proof-upload">
             <p><strong>Chave Pix:</strong> {campaign?.pix_key}</p>
-            <label htmlFor="proof-upload" className="upload-button">
-              📸 Enviar comprovante
+            <label
+              htmlFor="proof-upload"
+              className={`upload-button${uploading ? ' upload-button--enviando' : ''}`}
+            >
+              {uploading ? '⏳ Enviando...' : '📸 Enviar comprovante'}
             </label>
             <input
               id="proof-upload"
               type="file"
               accept="image/*"
+              disabled={uploading}
               style={{ display: 'none' }}
               onChange={async (e) => {
                 const file = e.target.files?.[0]
                 if (!file) return
 
                 setUploading(true)
-                setUploadSuccess(false)
                 setUploadError(false)
                 try {
-                  await handleFileUpload(file, orderId)
-                  setUploadSuccess(true)
+                  const resultado = await handleFileUpload(file, orderId)
+                  if (resultado) {
+                    setUploadSuccess(true)
+                    setUploadedAt(new Date())
+                  } else {
+                    setUploadError(true)
+                  }
                   e.target.value = ''
-                } catch (err) {
+                } catch {
                   setUploadError(true)
                 } finally {
                   setUploading(false)
@@ -243,9 +259,34 @@ const OrderPage = () => {
               }}
             />
 
-            {uploading && <p>⏳ Enviando comprovante...</p>}
-            {uploadSuccess && <p className="success-message">✅ Comprovante enviado com sucesso!</p>}
             {uploadError && <p className="error-message">❌ Erro ao enviar. Tente novamente.</p>}
+          </div>
+        )}
+
+        {/* Confirmação pós-upload */}
+        {uploadSuccess && uploadedAt && (
+          <div className="upload-confirmacao">
+            <p className="confirmacao-titulo">✅ Comprovante enviado!</p>
+            <div className="confirmacao-detalhes">
+              <p><strong>Nome:</strong> {order.customer_name}</p>
+              <p><strong>Quantidade:</strong> {order.quantity}</p>
+              <p><strong>Total:</strong> R$ {order.total_price}</p>
+              <p><strong>Pedido:</strong> <span className="order-id-curto">#{order.id.slice(0, 8).toUpperCase()}</span></p>
+              <p><strong>Enviado em:</strong> {uploadedAt.toLocaleString('pt-BR')}</p>
+            </div>
+            <p className="confirmacao-aviso">
+              Assim que o organizador confirmar o pagamento, você recebe a notificação aqui.
+            </p>
+            {campaign?.contact_whatsapp && (
+              <a
+                href={`https://wa.me/55${campaign.contact_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Enviei o comprovante do pedido #${order.id.slice(0, 8).toUpperCase()}. Pode verificar? 🙏`)}`}
+                className="whatsapp-acompanhamento"
+                target="_blank"
+                rel="noreferrer"
+              >
+                💬 Falar com o organizador
+              </a>
+            )}
           </div>
         )}
 
