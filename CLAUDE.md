@@ -1,4 +1,5 @@
 # CLAUDE.md — MULTIPLICA
+
 > Este arquivo é lido automaticamente pelo Claude Code ao iniciar toda sessão.
 > Leia-o integralmente antes de qualquer ação.
 
@@ -19,9 +20,11 @@ Antes de responder qualquer pergunta ou escrever qualquer código, leia os arqui
 ```
 
 Após a leitura, confirme com:
-> *"Li os arquivos. Entendi o estado atual do projeto. Pronto para trabalhar."*
+
+> _"Li os arquivos. Entendi o estado atual do projeto. Pronto para trabalhar."_
 
 Depois responda as três perguntas de alinhamento:
+
 1. Qual é o maior risco de segurança no projeto agora?
 2. Qual é a primeira coisa que vamos resolver?
 3. O que você **não** vai tocar nesta sessão?
@@ -35,10 +38,10 @@ Só prossiga após confirmar as três respostas.
 O **MULTIPLICA** é uma plataforma de gestão de pedidos coletivos em comunidades.
 Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações, vaquinhas).
 
-| Perfil | O que precisa |
-|---|---|
-| **Organizador** — Dona Neide | Criar campanha, validar comprovantes, cobrar pendentes |
-| **Comprador** — Seu João | Fazer pedido, pagar via Pix, enviar comprovante com segurança |
+| Perfil                       | O que precisa                                                 |
+| ---------------------------- | ------------------------------------------------------------- |
+| **Organizador** — Dona Neide | Criar campanha, validar comprovantes, cobrar pendentes        |
+| **Comprador** — Seu João     | Fazer pedido, pagar via Pix, enviar comprovante com segurança |
 
 **Estamos no MVP.** Velocidade, simplicidade e foco no essencial.
 Não sugira o que não foi pedido. Não adicione complexidade desnecessária.
@@ -47,15 +50,15 @@ Não sugira o que não foi pedido. Não adicione complexidade desnecessária.
 
 ## 🛠️ Stack Tecnológica
 
-| Camada | Tecnologia | Observação |
-|---|---|---|
-| Frontend | **React + Vite + Tailwind CSS** | Mobile-first |
-| Banco de Dados | **Supabase (PostgreSQL)** | RLS ativo em todas as tabelas |
-| Storage | **Supabase Storage** | Bucket `comprovantes` — deve ser privado |
-| Automação | **Make.com** e **n8n** | Fluxos exportados em `/automations/` |
-| Scripts | **JavaScript / Google Apps Script** | Simples, modulares, sem frameworks |
-| Hospedagem | **Vercel** | Deploy contínuo via Git |
-| Mensageria | **API WhatsApp** | Notificações e cobranças amigáveis |
+| Camada         | Tecnologia                          | Observação                               |
+| -------------- | ----------------------------------- | ---------------------------------------- |
+| Frontend       | **React + Vite + Tailwind CSS**     | Mobile-first                             |
+| Banco de Dados | **Supabase (PostgreSQL)**           | RLS ativo em todas as tabelas            |
+| Storage        | **Supabase Storage**                | Bucket `comprovantes` — deve ser privado |
+| Automação      | **Make.com** e **n8n**              | Fluxos exportados em `/automations/`     |
+| Scripts        | **JavaScript / Google Apps Script** | Simples, modulares, sem frameworks       |
+| Hospedagem     | **Vercel**                          | Deploy contínuo via Git                  |
+| Mensageria     | **API WhatsApp**                    | Notificações e cobranças amigáveis       |
 
 > Se precisar sugerir tecnologia fora desta lista, **justifique antes de implementar**.
 
@@ -66,7 +69,8 @@ Não sugira o que não foi pedido. Não adicione complexidade desnecessária.
 Não avance para o próximo item sem confirmar que o anterior está resolvido.
 
 ### ✅ Prioridade 1 — CONCLUÍDA: Fechar o painel admin
-*(Concluída em 2026-03-31)*
+
+_(Concluída em 2026-03-31)_
 
 - `manager_token UUID` garantido na tabela `campaigns`
 - RLS em `orders`: SELECT restrito por token ou order_id; UPDATE restrito ao admin com token válido
@@ -78,7 +82,8 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 ---
 
 ### ✅ Prioridade 2 — CONCLUÍDA: Storage de comprovantes privado
-*(Concluída em 2026-03-31)*
+
+_(Concluída em 2026-03-31)_
 
 - Bucket `comprovantes` alterado para `public = false`
 - `proof_url` no banco salva path relativo — nunca URL pública
@@ -90,7 +95,8 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 ---
 
 ### ✅ Prioridade 3 — CONCLUÍDA: Token via fragmento de URL
-*(Concluída junto com P1 em 2026-03-31)*
+
+_(Concluída junto com P1 em 2026-03-31)_
 
 - Link Mágico usa `/admin/:slug#auth=UUID`
 - Token lido via `window.location.hash` — nunca da query string
@@ -100,16 +106,29 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 
 ### 🟡 Prioridade 4 — PRÓXIMA: Refinamento de UX do comprador
 
-- Adicionar estado "Enviando..." no botão de upload — desabilitado durante o processo
-- Impedir múltiplos envios do mesmo comprovante
-- Revisar espaçamentos, cores e tipografia
-- Garantir que "Ver Pix novamente" aparece apenas quando `showPix = false`
-- Feedback de sucesso/erro que desaparece após 3 segundos
+**Antes de começar:** verificar se o upload está salvando `proof_url`
+como path relativo (ex: `pedidos/abc123.jpg`) e não como URL completa.
+Corrigir se necessário antes de qualquer outra alteração.
+
+**Ordem de execução:**
+
+1. Botão "Enviando..." — desabilitado durante o upload, reativado ao concluir
+2. Impedir múltiplos envios do mesmo comprovante
+3. Tela de confirmação pós-upload — exibir resumo do pedido, order ID e data/hora
+4. Link de acompanhamento enviado via WhatsApp após upload bem-sucedido
+5. Feedback de sucesso/erro que desaparece após 3 segundos
+6. Botão "Ver Pix novamente" apenas quando `showPix = false`
+7. Revisão visual — espaçamentos, cores e tipografia
+
+**Princípio guia:** A interface precisa parecer uma conversa, não um formulário.
+O comprador já sabe mandar print — ele faz isso no WhatsApp todo dia.
+A UX deve tornar o processo tão familiar que não pareça novo.
 
 ---
 
 ### Prioridade 5 — MÉDIA: Validação de comprovante no admin
-*(Só após P4 concluída)*
+
+_(Só após P4 concluída)_
 
 - Impedir aprovação de pedido sem comprovante (`proof_url` nula)
 - Exibir alerta claro ao tentar aprovar sem comprovante
@@ -120,31 +139,31 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 
 ## 🔒 Estado Atual de Segurança (Referência)
 
-| Item | Estado | Observação |
-|---|---|---|
-| RLS em `orders` — INSERT | ✅ OK | Aberto para anon com rate limiting |
-| RLS em `orders` — SELECT | ✅ OK | Admin via token; comprador via order_id |
-| RLS em `orders` — UPDATE | ✅ OK | Restrito ao portador do `manager_token` |
-| Bucket `comprovantes` | ✅ OK | Privado — URLs assinadas com expiração de 1h |
-| Token do admin na URL | ✅ OK | Fragmento `#auth=UUID`, limpo após captura |
-| Imutabilidade de pedidos | ✅ OK | Trigger ativo no banco |
+| Item                     | Estado | Observação                                   |
+| ------------------------ | ------ | -------------------------------------------- |
+| RLS em `orders` — INSERT | ✅ OK  | Aberto para anon com rate limiting           |
+| RLS em `orders` — SELECT | ✅ OK  | Admin via token; comprador via order_id      |
+| RLS em `orders` — UPDATE | ✅ OK  | Restrito ao portador do `manager_token`      |
+| Bucket `comprovantes`    | ✅ OK  | Privado — URLs assinadas com expiração de 1h |
+| Token do admin na URL    | ✅ OK  | Fragmento `#auth=UUID`, limpo após captura   |
+| Imutabilidade de pedidos | ✅ OK  | Trigger ativo no banco                       |
 
 ---
 
 ## ✅ O Que Já Foi Resolvido — Não Toque
 
-| Problema resolvido | Solução aplicada |
-|---|---|
-| RLS bloqueando INSERT/SELECT | Policies específicas para anon |
-| Status não atualizava na tela | Polling a cada 5s + mapeamento de `pending_payment` |
-| Dados sumiam após reload | `getOrderById` + estado `order` + localStorage |
-| Upload com dois passos | Botão único com label + input hidden |
-| Modal abrindo nova aba | Modal com overlay e imagem responsiva |
-| Polling parando | Ajuste no array de dependências do useEffect |
-| Export duplicado | Remoção do export duplo em `AdminPage.jsx` |
-| Painel admin público | RLS com `manager_token` + token via `x-manager-token` header |
+| Problema resolvido            | Solução aplicada                                                   |
+| ----------------------------- | ------------------------------------------------------------------ |
+| RLS bloqueando INSERT/SELECT  | Policies específicas para anon                                     |
+| Status não atualizava na tela | Polling a cada 5s + mapeamento de `pending_payment`                |
+| Dados sumiam após reload      | `getOrderById` + estado `order` + localStorage                     |
+| Upload com dois passos        | Botão único com label + input hidden                               |
+| Modal abrindo nova aba        | Modal com overlay e imagem responsiva                              |
+| Polling parando               | Ajuste no array de dependências do useEffect                       |
+| Export duplicado              | Remoção do export duplo em `AdminPage.jsx`                         |
+| Painel admin público          | RLS com `manager_token` + token via `x-manager-token` header       |
 | Token exposto na query string | Fragmento `#auth=UUID` + `history.replaceState` + `sessionStorage` |
-| Comprovantes com URL pública | Bucket privado + path relativo no banco + URL assinada 1h |
+| Comprovantes com URL pública  | Bucket privado + path relativo no banco + URL assinada 1h          |
 
 ---
 
@@ -152,18 +171,19 @@ Não avance para o próximo item sem confirmar que o anterior está resolvido.
 
 Estas decisões foram tomadas conscientemente. Não sugira alternativas sem ser solicitado.
 
-| Decisão | Motivo |
-|---|---|
+| Decisão                                         | Motivo                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------------ |
 | **localStorage** para persistência do comprador | Escolha de UX — usuário sem conta quer ver pedido ao reabrir o navegador |
-| **Polling de 5s** em vez de Realtime | Aceitável para MVP. ~10 req/s com 50 usuários. Realtime é roadmap futuro |
-| **Zero-Auth** para o comprador | Pilar do produto. Nunca sugira login/senha para o comprador |
-| **Token UUID** para o organizador | Solução enxuta para MVP, reforçada com header + fragmento de URL |
+| **Polling de 5s** em vez de Realtime            | Aceitável para MVP. ~10 req/s com 50 usuários. Realtime é roadmap futuro |
+| **Zero-Auth** para o comprador                  | Pilar do produto. Nunca sugira login/senha para o comprador              |
+| **Token UUID** para o organizador               | Solução enxuta para MVP, reforçada com header + fragmento de URL         |
 
 ---
 
 ## 📝 Regras de Desenvolvimento
 
 ### Idioma
+
 - Comentários → **Português**
 - Variáveis e funções → **Português** (camelCase)
 - Commits → **Português**
@@ -171,14 +191,15 @@ Estas decisões foram tomadas conscientemente. Não sugira alternativas sem ser 
 ```js
 // ✅ Correto
 const totalDoPedido = calcularTotal(itensSelecionados);
-async function enviarComprovante(idPedido, arquivoComprovante) { }
+async function enviarComprovante(idPedido, arquivoComprovante) {}
 
 // ❌ Evitar
 const ttl = calc(itns);
-async function envComp(id, arq) { }
+async function envComp(id, arq) {}
 ```
 
 ### Segurança — inegociável
+
 Nunca escreva chaves, tokens ou senhas no código.
 
 ```js
@@ -190,6 +211,7 @@ const supabaseUrl = "https://xyzcompany.supabase.co";
 ```
 
 ### Cabeçalho em todo arquivo novo
+
 ```js
 /**
  * MULTIPLICA — [Nome do Módulo]
@@ -199,6 +221,7 @@ const supabaseUrl = "https://xyzcompany.supabase.co";
 ```
 
 ### Simplicidade
+
 - Sem frameworks fora da stack listada
 - Funções pequenas com uma responsabilidade
 - Sem dependências novas sem justificativa
@@ -208,6 +231,7 @@ const supabaseUrl = "https://xyzcompany.supabase.co";
 ## 🔄 Fluxos de Negócio
 
 ### Fluxo do Comprador
+
 ```
 Acessar link público → Selecionar itens → Ver chave Pix e valor total
 → Pagar externamente → Enviar print do comprovante
@@ -215,6 +239,7 @@ Acessar link público → Selecionar itens → Ver chave Pix e valor total
 ```
 
 ### Fluxo do Organizador
+
 ```
 Criar campanha → Receber Link Mágico (manager_token via fragmento #)
 → Compartilhar link público → Receber notificação de novo comprovante
@@ -223,6 +248,7 @@ Criar campanha → Receber Link Mágico (manager_token via fragmento #)
 ```
 
 ### Regras críticas de negócio
+
 - Pedidos são **imutáveis** após criação — `quantity`, `item_price`, `customer_name` nunca mudam
 - `manager_token` **nunca** aparece em query string — sempre header `x-manager-token`
 - INSERT de pedidos é público, mas com rate limiting por IP
@@ -280,13 +306,14 @@ git commit -m "feat: adiciona estado enviando no upload de comprovante"
 ```
 
 ### Prefixos de commit
-| Prefixo | Quando usar |
-|---|---|
-| `feat:` | Nova funcionalidade |
-| `fix:` | Correção de bug |
-| `security:` | Segurança ou LGPD |
+
+| Prefixo     | Quando usar                      |
+| ----------- | -------------------------------- |
+| `feat:`     | Nova funcionalidade              |
+| `fix:`      | Correção de bug                  |
+| `security:` | Segurança ou LGPD                |
 | `refactor:` | Melhoria sem mudar comportamento |
-| `docs:` | Apenas documentação |
+| `docs:`     | Apenas documentação              |
 
 ---
 
@@ -315,4 +342,4 @@ git commit -m "feat: adiciona estado enviando no upload de comprovante"
 
 ---
 
-*MULTIPLICA — Juntos fazemos mais.*
+_MULTIPLICA — Juntos fazemos mais._
