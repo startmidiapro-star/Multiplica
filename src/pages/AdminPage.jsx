@@ -141,7 +141,7 @@ export default function AdminPage() {
               </div>
             )}
 
-            {order.status === 'pending_payment' && order.proof_url && (
+            {order.status === 'pending_payment' && (
               <div className="actions">
                 <button 
                   className="btn-approve"

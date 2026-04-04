@@ -19,10 +19,16 @@ export async function getOrdersByCampaign(campaignId) {
     .order('created_at', { ascending: false })
   
   if (error) throw error
-  
+
+  // Normaliza status: remove aspas extras que possam ter sido gravadas no banco
+  const pedidosNormalizados = data.map((pedido) => ({
+    ...pedido,
+    status: pedido.status?.replace(/^['"]|['"]$/g, '') ?? pedido.status,
+  }))
+
   // Ordenar por prioridade: pending_payment → approved → rejected
   const orderPriority = { pending_payment: 1, approved: 2, rejected: 3 }
-  return data.sort((a, b) => orderPriority[a.status] - orderPriority[b.status])
+  return pedidosNormalizados.sort((a, b) => orderPriority[a.status] - orderPriority[b.status])
 }
 
 export async function updateOrderStatus(orderId, newStatus) {
