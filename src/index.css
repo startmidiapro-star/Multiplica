@@ -111,35 +111,7 @@ code {
 }
 
 /* OrderPage additions */
-.delivery-date { color: #666; font-size: 14px; margin-bottom: 16px; }
-.whatsapp-button { background: #25D366; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-top: 12px; }
-.new-order-button { background: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-top: 12px; }
-.show-pix-button { background: #f59e0b; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-top: 12px; }
-.upload-button {
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 8px;
-}
-.upload-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.upload-button {
-  display: inline-block;
-  background: #10b981;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  text-align: center;
-  width: 100%;
-  max-width: 300px;
-}
+.delivery-date { color: #666; font-size: 14px; margin-bottom: 4px; }
 .success-message {
   color: #10b981;
   margin-top: 8px;
@@ -147,13 +119,7 @@ code {
 .error-message {
   color: #ef4444;
   margin-top: 8px;
-}
-
-/* Estado de envio no botão de upload */
-.upload-button--enviando {
-  opacity: 0.7;
-  cursor: not-allowed;
-  pointer-events: none;
+  font-size: 0.9rem;
 }
 
 /* Tela de confirmação pós-upload */

@@ -212,13 +212,78 @@
   flex-shrink: 0;
 }
 
-/* Blocos de status do pedido (pending, approved, rejected) */
-.status-block {
+/* Wrapper principal da tela de pedido existente */
+.order-page {
   display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Resumo dos dados do comprador */
+.customer-info {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: var(--text-h);
+  text-align: left;
+}
+
+/* Seção de upload do comprovante */
+.proof-upload {
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+}
+
+.proof-upload p {
+  font-size: 0.95rem;
+  color: var(--text-h);
+  word-break: break-all;
+}
+
+/* Botão de upload de comprovante */
+.upload-button {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  padding: 14px 24px;
   border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  transition: opacity 0.2s;
+}
+
+.upload-button:hover {
+  opacity: 0.9;
+}
+
+.upload-button--enviando {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Blocos de status do pedido (pending, approved, rejected) */
+.status-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 10px;
 }
 
 .status-block p {
@@ -231,6 +296,8 @@
   flex-shrink: 0;
 }
 
+/* pending_payment é o valor real do banco — status-pending é alias legado */
+.status-pending_payment,
 .status-pending {
   background: #fef9c3;
   color: #854d0e;
@@ -244,4 +311,39 @@
 .status-rejected {
   background: #fee2e2;
   color: #991b1b;
+}
+
+/* Botões de ação da tela de pedido — full-width, altura confortável */
+.show-pix-button,
+.whatsapp-button,
+.new-order-button {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.show-pix-button:hover,
+.whatsapp-button:hover,
+.new-order-button:hover {
+  opacity: 0.9;
+}
+
+.show-pix-button {
+  background: #f59e0b;
+  color: white;
+}
+
+.whatsapp-button {
+  background: #25D366;
+  color: white;
+}
+
+.new-order-button {
+  background: var(--accent);
+  color: white;
 }
