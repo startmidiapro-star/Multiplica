@@ -18,7 +18,18 @@ export default function AdminPage() {
     // O fragmento não é enviado ao servidor pelo navegador
     const fragmento = window.location.hash.slice(1)
     const parametrosHash = new URLSearchParams(fragmento)
-    const authToken = parametrosHash.get('auth')
+    let authToken = parametrosHash.get('auth')
+
+    // Fallback para sessionStorage: necessário porque o React StrictMode
+    // executa efeitos duas vezes em dev. Na segunda execução o hash já foi
+    // limpo pela primeira, mas o token foi salvo na sessionStorage.
+    if (!authToken) {
+      try {
+        authToken = sessionStorage.getItem('manager_token')
+      } catch {
+        // sessionStorage indisponível — ignora
+      }
+    }
 
     if (!authToken) {
       setError('Acesso não autorizado')
