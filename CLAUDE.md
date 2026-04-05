@@ -115,23 +115,57 @@ _(Concluída junto com P1 em 2026-03-31)_
 - Botão "Ver Pix novamente" condicional ✅
 - Revisão visual completa — compatível com modo escuro/claro ✅
 
-### 🟡 Prioridade 5 — PRÓXIMA: Validação de comprovante no admin
+### ✅ Prioridade 5 — CONCLUÍDA: Validação de comprovante no admin
 
-- Impedir aprovação de pedido sem comprovante
-- Alerta claro ao tentar aprovar sem comprovante
-- Badge "📸 Tem comprovante" nos cards
-- Destacar pedidos sem comprovante com borda ou ícone de atenção
+- Aprovação bloqueada sem comprovante ✅
+- Confirmação antes de aprovar (com nome e valor) ✅
+- Confirmação antes de rejeitar ✅
+- Badge redundante removido ✅
+- Data nula exibe "Entrega: não definida" ✅
+- WhatsApp vazio tratado corretamente ✅
 
----
+### 🟡 Prioridade 6 — PRÓXIMA: Dashboard de criação de campanha
 
-### Prioridade 5 — MÉDIA: Validação de comprovante no admin
+**Rota nova:** `/nova-campanha` → `src/pages/CreateCampaign.jsx`
 
-_(Só após P4 concluída)_
+**Atualizar Home.jsx** para exibir dois botões:
 
-- Impedir aprovação de pedido sem comprovante (`proof_url` nula)
-- Exibir alerta claro ao tentar aprovar sem comprovante
-- Badge visual "📸 Tem comprovante" nos cards
-- Destacar pedidos sem comprovante com borda ou ícone de atenção
+- "Criar nova campanha" → /nova-campanha
+- "Já tenho uma campanha" → instrução para usar o Link Mágico
+
+**Formulário de criação (Tela 1):**
+
+- Nome da campanha \* (obrigatório)
+- Item vendido \* (obrigatório)
+- Preço unitário \* (obrigatório)
+- Chave Pix \* (obrigatório)
+- Data de entrega (opcional)
+- WhatsApp de contato (opcional)
+
+**Lógica ao salvar:**
+
+1. Gerar slug único a partir do nome da campanha
+2. Inserir campanha no banco — manager_token gerado automaticamente pelo banco via gen_random_uuid()
+3. Buscar o manager_token gerado
+4. Exibir Tela 2
+
+**Tela de confirmação (Tela 2):**
+
+- Mensagem "✅ Campanha criada!"
+- Exibir link dos compradores: `/c/:slug`
+- Exibir link de gestão completo: `/admin/:slug#auth=:manager_token`
+- Botão "Copiar link" para cada link
+- Aviso destacado: "⚠️ Guarde este link! Ele é sua senha de acesso. Não compartilhe."
+- Botão "Abrir painel agora" → abre /admin/:slug#auth=:manager_token
+- Botão "Criar outra campanha" → volta para Tela 1 limpa
+
+**Regras importantes:**
+
+- slug gerado automaticamente — nunca digitado pela Dona Neide
+- manager_token gerado pelo banco — nunca pelo frontend
+- Link de gestão exibido uma única vez com aviso explícito de guardar
+- Campos obrigatórios validados antes de submeter
+- Sem autenticação — qualquer pessoa pode criar uma campanha (MVP)
 
 ---
 
