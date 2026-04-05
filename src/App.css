@@ -347,3 +347,255 @@
   background: var(--accent);
   color: white;
 }
+
+/* ─── Painel Admin ─────────────────────────────────────────────────────────
+   Cores explícitas em todos os elementos — sem herança de variável de tema.
+   O admin é ferramenta interna: mantém aparência light independente do SO.
+   ────────────────────────────────────────────────────────────────────────── */
+.admin-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #ffffff;
+  color: #111827;
+  min-height: 100svh;
+  box-sizing: border-box;
+}
+
+.admin-container h1,
+.admin-container h2 {
+  color: #111827;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.admin-header {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-header h1 {
+  font-size: 1.4rem;
+  margin: 0 0 8px;
+  color: #111827;
+}
+
+.admin-header p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.orders-list h2 {
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+  color: #374151;
+}
+
+.order-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #e5e7eb;
+}
+
+.order-pending_payment {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.order-approved {
+  border-left-color: #10b981;
+  background: #f0fdf4;
+}
+
+.order-rejected {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.order-header strong {
+  color: #111827;
+  font-size: 1rem;
+}
+
+.admin-status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.admin-status-badge.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.admin-status-badge.approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.admin-status-badge.rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.order-details {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.order-details p {
+  margin: 4px 0;
+}
+
+.proof-section {
+  margin-bottom: 12px;
+}
+
+.proof-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.proof-button:hover {
+  background: #1d4ed8;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn-approve {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-approve:hover {
+  background: #059669;
+}
+
+.btn-reject {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-reject:hover {
+  background: #dc2626;
+}
+
+.btn-approve:disabled,
+.btn-reject:disabled,
+.proof-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.no-proof-admin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+  padding: 8px 12px;
+}
+
+.admin-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* Modal do comprovante */
+.proof-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.proof-modal-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.proof-modal-content img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.proof-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1001;
+}
