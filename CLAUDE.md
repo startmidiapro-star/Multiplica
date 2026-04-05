@@ -104,25 +104,23 @@ _(Concluída junto com P1 em 2026-03-31)_
 
 ---
 
-### 🟡 Prioridade 4 — PRÓXIMA: Refinamento de UX do comprador
+### ✅ Prioridade 4 — CONCLUÍDA: Refinamento de UX do comprador
 
-**Antes de começar:** verificar se o upload está salvando `proof_url`
-como path relativo (ex: `pedidos/abc123.jpg`) e não como URL completa.
-Corrigir se necessário antes de qualquer outra alteração.
+- proof_url salvo como path relativo ✅
+- Botão "Enviando..." desabilitado durante upload ✅
+- Múltiplos envios impedidos ✅
+- Tela de confirmação pós-upload ✅
+- Link WhatsApp pós-upload ✅
+- Feedback de sucesso/erro some após 3s ✅
+- Botão "Ver Pix novamente" condicional ✅
+- Revisão visual completa — compatível com modo escuro/claro ✅
 
-**Ordem de execução:**
+### 🟡 Prioridade 5 — PRÓXIMA: Validação de comprovante no admin
 
-1. Botão "Enviando..." — desabilitado durante o upload, reativado ao concluir
-2. Impedir múltiplos envios do mesmo comprovante
-3. Tela de confirmação pós-upload — exibir resumo do pedido, order ID e data/hora
-4. Link de acompanhamento enviado via WhatsApp após upload bem-sucedido
-5. Feedback de sucesso/erro que desaparece após 3 segundos
-6. Botão "Ver Pix novamente" apenas quando `showPix = false`
-7. Revisão visual — espaçamentos, cores e tipografia
-
-**Princípio guia:** A interface precisa parecer uma conversa, não um formulário.
-O comprador já sabe mandar print — ele faz isso no WhatsApp todo dia.
-A UX deve tornar o processo tão familiar que não pareça novo.
+- Impedir aprovação de pedido sem comprovante
+- Alerta claro ao tentar aprovar sem comprovante
+- Badge "📸 Tem comprovante" nos cards
+- Destacar pedidos sem comprovante com borda ou ícone de atenção
 
 ---
 
