@@ -277,7 +277,7 @@ const OrderPage = () => {
             <p className="confirmacao-aviso">
               Assim que o organizador confirmar o pagamento, você recebe a notificação aqui.
             </p>
-            {campaign?.contact_whatsapp && (
+            {campaign?.contact_whatsapp?.trim() && (
               <a
                 href={`https://wa.me/55${campaign.contact_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Enviei o comprovante do pedido #${order.id.slice(0, 8).toUpperCase()}. Pode verificar? 🙏`)}`}
                 className="whatsapp-acompanhamento"
@@ -298,7 +298,7 @@ const OrderPage = () => {
         )}
 
         {/* Botão WhatsApp - apenas quando rejected E campaign tem contato */}
-        {orderStatus === 'rejected' && campaign?.contact_whatsapp && (
+        {orderStatus === 'rejected' && campaign?.contact_whatsapp?.trim() && (
           <button 
             className="whatsapp-button"
             onClick={() => window.open(`https://wa.me/55${campaign.contact_whatsapp.replace(/\D/g, '')}`, '_blank')}

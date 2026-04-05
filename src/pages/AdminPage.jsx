@@ -85,14 +85,24 @@ export default function AdminPage() {
   }
 
   async function handleStatusUpdate(orderId, newStatus) {
+    const pedido = orders.find((o) => o.id === orderId)
+
     // Impede aprovação sem comprovante — exibe alerta inline por 3 segundos
     if (newStatus === 'approved') {
-      const pedido = orders.find((o) => o.id === orderId)
       if (!pedido?.proof_url) {
         setAlertaSemComprovante(orderId)
         setTimeout(() => setAlertaSemComprovante(null), 3000)
         return
       }
+      const confirmado = window.confirm(
+        `Verificou o comprovante de ${pedido.customer_name} — R$ ${pedido.total_price}? Confirmar?`
+      )
+      if (!confirmado) return
+    }
+
+    if (newStatus === 'rejected') {
+      const confirmado = window.confirm('Rejeitar este pedido?')
+      if (!confirmado) return
     }
 
     setActionLoading(orderId)
@@ -117,8 +127,13 @@ export default function AdminPage() {
     <div className="admin-container">
       <header className="admin-header">
         <h1>📋 {campaign.name}</h1>
-        <p>📅 Entrega: {new Date(campaign.delivery_at).toLocaleDateString('pt-BR')}</p>
-        <p>📞 Contato: {campaign.contact_whatsapp}</p>
+        {campaign.delivery_at
+          ? <p>📅 Entrega: {new Date(campaign.delivery_at).toLocaleDateString('pt-BR')}</p>
+          : <p>📅 Entrega: não definida</p>
+        }
+        {campaign.contact_whatsapp?.trim() && (
+          <p>📞 Contato: {campaign.contact_whatsapp}</p>
+        )}
       </header>
 
       <div className="orders-list">
@@ -135,10 +150,7 @@ export default function AdminPage() {
             <div className="order-header">
               <strong>{order.customer_name}</strong>
               <div className="order-header-badges">
-                {order.proof_url && (
-                  <span className="badge-tem-comprovante">📸 Comprovante</span>
-                )}
-                <span className={`admin-status-badge ${order.status === 'pending_payment' ? 'pending' : order.status}`}>
+<span className={`admin-status-badge ${order.status === 'pending_payment' ? 'pending' : order.status}`}>
                   {order.status === 'pending_payment' && '⏳ Aguardando'}
                   {order.status === 'approved' && '✅ Aprovado'}
                   {order.status === 'rejected' && '❌ Rejeitado'}
