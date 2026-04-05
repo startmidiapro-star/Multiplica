@@ -12,6 +12,8 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState(null)
   const [selectedProof, setSelectedProof] = useState(null)
   const [loadingProof, setLoadingProof] = useState(false)
+  // ID do pedido que tentou ser aprovado sem comprovante (alerta inline)
+  const [alertaSemComprovante, setAlertaSemComprovante] = useState(null)
 
   useEffect(() => {
     // Lê o token do fragmento da URL (#auth=UUID) — nunca da query string
@@ -83,10 +85,20 @@ export default function AdminPage() {
   }
 
   async function handleStatusUpdate(orderId, newStatus) {
+    // Impede aprovação sem comprovante — exibe alerta inline por 3 segundos
+    if (newStatus === 'approved') {
+      const pedido = orders.find((o) => o.id === orderId)
+      if (!pedido?.proof_url) {
+        setAlertaSemComprovante(orderId)
+        setTimeout(() => setAlertaSemComprovante(null), 3000)
+        return
+      }
+    }
+
     setActionLoading(orderId)
     try {
       await updateOrderStatus(orderId, newStatus)
-      setOrders(orders.map(order => 
+      setOrders(orders.map(order =>
         order.id === orderId ? { ...order, status: newStatus } : order
       ))
     } catch (err) {
@@ -112,15 +124,26 @@ export default function AdminPage() {
       <div className="orders-list">
         <h2>Pedidos ({orders.length})</h2>
 
-        {orders.map(order => (
-          <div key={order.id} className={`order-card order-${order.status}`}>
+        {orders.map(order => {
+          // Card sem comprovante recebe classe extra para destaque visual
+          const semComprovante = order.status === 'pending_payment' && !order.proof_url
+          return (
+          <div
+            key={order.id}
+            className={`order-card order-${order.status}${semComprovante ? ' order-card--sem-comprovante' : ''}`}
+          >
             <div className="order-header">
               <strong>{order.customer_name}</strong>
-              <span className={`admin-status-badge ${order.status === 'pending_payment' ? 'pending' : order.status}`}>
-                {order.status === 'pending_payment' && '⏳ Aguardando'}
-                {order.status === 'approved' && '✅ Aprovado'}
-                {order.status === 'rejected' && '❌ Rejeitado'}
-              </span>
+              <div className="order-header-badges">
+                {order.proof_url && (
+                  <span className="badge-tem-comprovante">📸 Comprovante</span>
+                )}
+                <span className={`admin-status-badge ${order.status === 'pending_payment' ? 'pending' : order.status}`}>
+                  {order.status === 'pending_payment' && '⏳ Aguardando'}
+                  {order.status === 'approved' && '✅ Aprovado'}
+                  {order.status === 'rejected' && '❌ Rejeitado'}
+                </span>
+              </div>
             </div>
 
             <div className="order-details">
@@ -160,13 +183,21 @@ export default function AdminPage() {
               </div>
             )}
 
+            {/* Alerta inline ao tentar aprovar sem comprovante */}
+            {alertaSemComprovante === order.id && (
+              <div className="alerta-sem-comprovante">
+                ⚠️ Não é possível aprovar sem comprovante. Aguarde o envio.
+              </div>
+            )}
+
             {order.status === 'pending_payment' && !order.proof_url && (
               <div className="no-proof-admin">
                 <Clock size={18} /> Aguardando envio do comprovante
               </div>
             )}
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {selectedProof && (

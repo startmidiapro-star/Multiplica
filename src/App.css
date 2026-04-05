@@ -436,6 +436,42 @@
   font-size: 1rem;
 }
 
+/* Agrupa os badges (comprovante + status) no cabeçalho do card */
+.order-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Badge verde — confirma que o comprovante foi enviado */
+.badge-tem-comprovante {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Destaque vermelho discreto para pedidos pendentes sem comprovante */
+.order-card--sem-comprovante {
+  border-left-color: #ef4444 !important;
+}
+
+/* Alerta inline ao tentar aprovar sem comprovante */
+.alerta-sem-comprovante {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .admin-status-badge {
   padding: 4px 12px;
   border-radius: 20px;
