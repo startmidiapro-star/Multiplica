@@ -124,61 +124,96 @@ _(Concluída junto com P1 em 2026-03-31)_
 - Data nula exibe "Entrega: não definida" ✅
 - WhatsApp vazio tratado corretamente ✅
 
-### 🟡 Prioridade 6 — PRÓXIMA: Dashboard de criação de campanha
+markdown### ✅ Prioridade 6 — CONCLUÍDA: Dashboard de criação de campanha
 
-**Rota nova:** `/nova-campanha` → `src/pages/CreateCampaign.jsx`
+- Rota `/nova-campanha` → `CreateCampaign.jsx` ✅
+- Home atualizada com dois botões ✅
+- Formulário com campos obrigatórios e opcionais ✅
+- slug gerado automaticamente com sufixo aleatório ✅
+- manager_token gerado pelo banco — nunca pelo frontend ✅
+- Tela de confirmação com links e aviso de guardar ✅
+- RLS em `campaigns` — INSERT aberto, SELECT restrito via `x-campaign-id` ✅
 
-**Atualizar Home.jsx** para exibir dois botões:
+---
 
-- "Criar nova campanha" → /nova-campanha
-- "Já tenho uma campanha" → instrução para usar o Link Mágico
+### 🟡 Prioridade 7 — PRÓXIMA: Home + Contador + Compartilhar
 
-**Formulário de criação (Tela 1):**
+**Arquivos envolvidos:** `Home.jsx`, `App.css`, `AdminPage.jsx`
 
-- Nome da campanha \* (obrigatório)
-- Item vendido \* (obrigatório)
-- Preço unitário \* (obrigatório)
-- Chave Pix \* (obrigatório)
-- Data de entrega (opcional)
-- WhatsApp de contato (opcional)
+**7.1 Refinamento visual da Home**
 
-**Lógica ao salvar:**
+Estrutura final:
 
-1. Gerar slug único a partir do nome da campanha
-2. Inserir campanha no banco — manager_token gerado automaticamente pelo banco via gen_random_uuid()
-3. Buscar o manager_token gerado
-4. Exibir Tela 2
+- Título: MULTIPLICA (maior, mais peso)
+- Headline: "Organize sua campanha com simplicidade"
+- Subheadline: "Pedidos, comprovantes e confirmações em um só lugar."
+- Assinatura: "Juntos fazemos mais."
+- Botão primário: "Criar nova campanha"
+- Botão secundário: "Já tenho uma campanha" (mais contido, sem roubar protagonismo)
+- Mini-benefícios abaixo dos botões:
+  - Receba pedidos com um link
+  - Acompanhe pagamentos com clareza
+  - Organize tudo sem listas confusas
 
-**Tela de confirmação (Tela 2):**
+Direção visual:
 
-- Mensagem "✅ Campanha criada!"
-- Exibir link dos compradores: `/c/:slug`
-- Exibir link de gestão completo: `/admin/:slug#auth=:manager_token`
-- Botão "Copiar link" para cada link
-- Aviso destacado: "⚠️ Guarde este link! Ele é sua senha de acesso. Não compartilhe."
-- Botão "Abrir painel agora" → abre /admin/:slug#auth=:manager_token
-- Botão "Criar outra campanha" → volta para Tela 1 limpa
+- Hierarquia correta: título > headline > botões
+- Espaçamento generoso entre elementos
+- Botões mais contidos — não ocupam 100% em desktop
+- Compatível com dark e light mode
 
-**Regras importantes:**
+**7.2 Contador operacional no topo do admin**
 
-- slug gerado automaticamente — nunca digitado pela Dona Neide
-- manager_token gerado pelo banco — nunca pelo frontend
-- Link de gestão exibido uma única vez com aviso explícito de guardar
-- Campos obrigatórios validados antes de submeter
-- Sem autenticação — qualquer pessoa pode criar uma campanha (MVP)
+Bloco de resumo abaixo do header da campanha em `AdminPage.jsx`.
+Calculado a partir do array `orders` já carregado — sem requisição extra.
+
+Exibir:
+
+- Pedidos recebidos (total)
+- Aprovados
+- Pendentes de análise
+- Rejeitados
+- Total de itens a produzir (soma de `quantity` dos `approved`)
+- Valor confirmado (soma de `total_price` dos `approved`)
+- Valor pendente (soma de `total_price` dos `pending_payment`)
+
+Exemplo visual:
+Pedidos: 12 | Aprovados: 8 | Pendentes: 3 | Rejeitados: 1
+Itens a produzir: 46
+Confirmados: R$ 460,00 | Pendentes: R$ 120,00
+
+**7.3 Botão compartilhar campanha no WhatsApp**
+
+Mesmo bloco do contador. Gerar mensagem automática com dados reais:
+📣 Nossa campanha já está a todo vapor!
+Já temos [X] itens vendidos 🙌
+Se você ainda não fez seu pedido, ainda dá tempo:
+[LINK DA CAMPANHA /c/:slug]
+🕒 Entrega: [data de entrega, se existir]
+Compartilhe com quem puder 💛
+
+Botão abre `https://wa.me/?text={mensagem codificada}`.
+Se `delivery_at` for nulo, omitir a linha de entrega.
+
+**7.4 Remover `window.supabase` global**
+
+Em `src/lib/supabase.js`, remover a exposição global antes do deploy.
 
 ---
 
 ## 🔒 Estado Atual de Segurança (Referência)
 
-| Item                     | Estado | Observação                                   |
-| ------------------------ | ------ | -------------------------------------------- |
-| RLS em `orders` — INSERT | ✅ OK  | Aberto para anon com rate limiting           |
-| RLS em `orders` — SELECT | ✅ OK  | Admin via token; comprador via order_id      |
-| RLS em `orders` — UPDATE | ✅ OK  | Restrito ao portador do `manager_token`      |
-| Bucket `comprovantes`    | ✅ OK  | Privado — URLs assinadas com expiração de 1h |
-| Token do admin na URL    | ✅ OK  | Fragmento `#auth=UUID`, limpo após captura   |
-| Imutabilidade de pedidos | ✅ OK  | Trigger ativo no banco                       |
+| Item                        | Estado      | Observação                                   |
+| --------------------------- | ----------- | -------------------------------------------- |
+| RLS em `orders` — INSERT    | ✅ OK       | Aberto para anon com rate limiting           |
+| RLS em `orders` — SELECT    | ✅ OK       | Admin via token; comprador via order_id      |
+| RLS em `orders` — UPDATE    | ✅ OK       | Restrito ao portador do `manager_token`      |
+| RLS em `campaigns` — INSERT | ✅ OK       | Aberto para anon                             |
+| RLS em `campaigns` — SELECT | ✅ OK       | Restrito via `x-campaign-id`                 |
+| Bucket `comprovantes`       | ✅ OK       | Privado — URLs assinadas com expiração de 1h |
+| Token do admin na URL       | ✅ OK       | Fragmento `#auth=UUID`, limpo após captura   |
+| Imutabilidade de pedidos    | ✅ OK       | Trigger ativo no banco                       |
+| `window.supabase` global    | ⚠️ Pendente | Remover antes do deploy — P7 item 4          |
 
 ---
 
