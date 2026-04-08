@@ -307,8 +307,8 @@ const OrderPage = () => {
           </button>
         )}
 
-        {/* Botão novo pedido - apenas quando approved OU rejected */}
-        {(orderStatus === 'approved' || orderStatus === 'rejected') && (
+        {/* Botão novo pedido - após envio do comprovante, aprovação ou rejeição */}
+        {(uploadSuccess || orderStatus === 'approved' || orderStatus === 'rejected') && (
           <button 
             className="new-order-button"
             onClick={() => {

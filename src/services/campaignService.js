@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase.js'
+import { gerarSlug } from '../utils/index.js'
 
 /**
  * Busca campanha pelo slug.
@@ -107,6 +108,72 @@ export const uploadProof = async (file, orderId) => {
   } catch (err) {
     console.error('[campaignService] uploadProof:', err)
     return null
+  }
+}
+
+/**
+ * Cria uma nova campanha e retorna os dados incluindo o manager_token.
+ *
+ * Fluxo de segurança:
+ *   1. Gera o id da campanha no frontend com crypto.randomUUID()
+ *   2. Persiste o id em sessionStorage como 'multiplica_campaign_id_temp'
+ *   3. O custom fetch em supabase.js injeta 'x-campaign-id' em cada request
+ *   4. A policy RLS em campaigns permite SELECT somente onde id = x-campaign-id
+ *   5. Após o SELECT, limpa sessionStorage — header deixa de ser enviado
+ *
+ * O manager_token é gerado pelo banco (gen_random_uuid()) — nunca pelo frontend.
+ *
+ * @param {object} dados - { nome, itemVendido, precoUnitario, chavePix, dataEntrega, whatsapp }
+ * @returns {Promise<object|null>} Campanha criada (com manager_token) ou null
+ */
+export async function criarCampanha(dados) {
+  const idCampanha = crypto.randomUUID()
+  const slug = gerarSlug(dados.nome)
+
+  // Persiste temporariamente para injeção do header x-campaign-id
+  try {
+    sessionStorage.setItem('multiplica_campaign_id_temp', idCampanha)
+  } catch {}
+
+  try {
+    // INSERT sem .select() — não exige policy de SELECT para retornar dados
+    const { error: erroInsert } = await supabase
+      .from('campaigns')
+      .insert({
+        id: idCampanha,
+        name: dados.nome,
+        item_name: dados.itemVendido,
+        price: dados.precoUnitario,
+        pix_key: dados.chavePix,
+        delivery_at: dados.dataEntrega || null,
+        contact_whatsapp: dados.whatsapp || null,
+        slug,
+      })
+
+    if (erroInsert) {
+      console.error('[campaignService] criarCampanha INSERT:', erroInsert.message)
+      return null
+    }
+
+    // SELECT separado — a policy RLS permite porque x-campaign-id = id da campanha
+    // Retorna o manager_token gerado pelo banco via gen_random_uuid()
+    const { data, error: erroSelect } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('id', idCampanha)
+      .single()
+
+    if (erroSelect) {
+      console.error('[campaignService] criarCampanha SELECT:', erroSelect.message)
+      return null
+    }
+
+    return data
+  } finally {
+    // Limpa sempre — com ou sem erro — para não vazar o header em requests futuros
+    try {
+      sessionStorage.removeItem('multiplica_campaign_id_temp')
+    } catch {}
   }
 }
 

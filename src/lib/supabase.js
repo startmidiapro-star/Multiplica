@@ -32,12 +32,25 @@ const createFetchWithAuthHeader = () => {
       }
     })()
 
+    // ID temporário da campanha recém-criada (via sessionStorage)
+    // Usado apenas durante o INSERT + SELECT de criação de campanha
+    const campaignIdTemp = (() => {
+      try {
+        return sessionStorage.getItem('multiplica_campaign_id_temp')
+      } catch {
+        return null
+      }
+    })()
+
     const headers = new Headers(options.headers || {})
     if (authToken) {
       headers.set('x-manager-token', authToken)
     }
     if (orderId) {
       headers.set('x-order-id', orderId)
+    }
+    if (campaignIdTemp) {
+      headers.set('x-campaign-id', campaignIdTemp)
     }
 
     return defaultFetch(url, { ...options, headers })

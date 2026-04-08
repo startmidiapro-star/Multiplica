@@ -2,7 +2,8 @@
 
 .page-home,
 .page-order,
-.page-admin {
+.page-admin,
+.page-create {
   padding: 24px 20px;
   min-height: 100svh;
   display: flex;
@@ -23,7 +24,8 @@
 }
 
 .page-order,
-.page-admin {
+.page-admin,
+.page-create {
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
@@ -445,16 +447,6 @@
   justify-content: flex-end;
 }
 
-/* Badge verde — confirma que o comprovante foi enviado */
-.badge-tem-comprovante {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #d1fae5;
-  color: #065f46;
-}
-
 /* Destaque vermelho discreto para pedidos pendentes sem comprovante */
 .order-card--sem-comprovante {
   border-left-color: #ef4444 !important;
@@ -634,4 +626,285 @@
   cursor: pointer;
   font-size: 14px;
   z-index: 1001;
+}
+
+/* ── Home ── */
+
+.home-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.btn-home {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.btn-home--primario {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-home--primario:hover {
+  background: #1d4ed8;
+}
+
+.btn-home--secundario {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.btn-home--secundario:hover {
+  background: #e5e7eb;
+}
+
+.home-instrucao {
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.5;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.home-instrucao code {
+  font-size: 12px;
+  background: #e5e7eb;
+  padding: 2px 5px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+/* ── Criação de Campanha ── */
+
+.create-container,
+.create-confirmacao {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.create-container h1,
+.create-confirmacao h1 {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.create-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.create-form input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #ffffff;
+  color: #111827;
+}
+
+.create-form input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.create-erro {
+  color: #b91c1c;
+  font-size: 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.create-acoes {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btn-voltar {
+  flex: 1;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-voltar:hover {
+  background: #f3f4f6;
+}
+
+.btn-criar {
+  flex: 2;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-criar:hover {
+  background: #1d4ed8;
+}
+
+.btn-criar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Confirmação (Tela 2) ── */
+
+.confirmacao-titulo {
+  color: #065f46;
+}
+
+.confirmacao-nome {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.link-bloco {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link-bloco--admin {
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.link-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.link-texto {
+  font-size: 12px;
+  word-break: break-all;
+  color: #1d4ed8;
+  background: #eff6ff;
+  padding: 8px 10px;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.link-texto--admin {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.btn-copiar {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-copiar:hover {
+  background: #f3f4f6;
+}
+
+.btn-copiar--admin {
+  border-color: #fcd34d;
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.btn-copiar--admin:hover {
+  background: #fef08a;
+}
+
+.aviso-guardar {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.confirmacao-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-abrir-painel {
+  padding: 13px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-abrir-painel:hover {
+  background: #1d4ed8;
+}
+
+.btn-nova-campanha {
+  padding: 13px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-nova-campanha:hover {
+  background: #f3f4f6;
 }
