@@ -140,32 +140,41 @@ markdown### ✅ Prioridade 6 — CONCLUÍDA: Dashboard de criação de campanha
 
 **Arquivos envolvidos:** `Home.jsx`, `App.css`, `AdminPage.jsx`
 
-**7.1 Refinamento visual da Home**
+### 🎨 P7.1 — Identidade Visual da Home (executar primeiro na P7)
 
-Estrutura final:
+**Arquivo:** `src/pages/Home.jsx` e CSS correspondente. Não altere mais nada.
 
-- Título: MULTIPLICA (maior, mais peso)
-- Headline: "Organize sua campanha com simplicidade"
-- Subheadline: "Pedidos, comprovantes e confirmações em um só lugar."
-- Assinatura: "Juntos fazemos mais."
-- Botão primário: "Criar nova campanha"
-- Botão secundário: "Já tenho uma campanha" (mais contido, sem roubar protagonismo)
-- Mini-benefícios abaixo dos botões:
-  - Receba pedidos com um link
-  - Acompanhe pagamentos com clareza
-  - Organize tudo sem listas confusas
+**Cor principal unificada:** `#5a8fdb` em toda a página — título, ícones, bordas, assinatura, divisor. Exceção: árvore de fundo mantém cor e opacidade atuais, sem alteração.
 
-Direção visual:
+**Símbolo acima do título:** círculo central `#5a8fdb` de 12px com animação de pulso discreta (`animation: pulse 2s infinite ease-in-out` — sutil, sem distrair). Dois anéis concêntricos ao redor: 20px e 30px de diâmetro, mesma cor, opacidade decrescente. Representa o ponto do "i" expandido.
 
-- Hierarquia correta: título > headline > botões
-- Espaçamento generoso entre elementos
-- Botões mais contidos — não ocupam 100% em desktop
-- Compatível com dark e light mode
+**Título:** fonte Georgia ou similar com serifa. Estrutura: "multi" em `#1a1a2e` + "plica" em `#5a8fdb` itálico. O ponto do "i" em "multi" deve ser destacado em `#5a8fdb` e levemente maior — usar `<span>` com `position: relative` e pseudo-elemento `::after` para substituir o ponto original.
+
+**Botões:**
+
+- Largura máxima igual à largura total dos 3 cards abaixo em desktop
+- Em mobile: largura 100% para facilitar o toque
+- Texto sempre visível sem hover — contraste total
+- Primário: fundo `#5a8fdb`, texto branco, borda `#5a8fdb`
+- Secundário: fundo branco, texto `#5a8fdb`, borda `1.5px solid #5a8fdb`
+- Hover em ambos: fundo `#5a8fdb`, texto branco
+- Transition: `0.2s ease`
+
+**Cards:** manter layout 3 colunas. Ícones internos em `#5a8fdb`.
+
+**Assinatura:** "Juntos fazemos mais." em `#5a8fdb`, itálico, font-weight 700.
+
+**Headline:** "Gerencie vendas e arrecadações da sua comunidade com simplicidade."
+
+**Subheadline:** "Pedidos, comprovantes e confirmações em um só lugar."
+
+**Restrições:** não alterar lógica, rotas, outros componentes ou a árvore de fundo.
 
 **7.2 Contador operacional no topo do admin**
 
 Bloco de resumo abaixo do header da campanha em `AdminPage.jsx`.
 Calculado a partir do array `orders` já carregado — sem requisição extra.
+Visual em cards ou badges — não texto corrido.
 
 Exibir:
 
@@ -177,29 +186,31 @@ Exibir:
 - Valor confirmado (soma de `total_price` dos `approved`)
 - Valor pendente (soma de `total_price` dos `pending_payment`)
 
-Exemplo visual:
-Pedidos: 12 | Aprovados: 8 | Pendentes: 3 | Rejeitados: 1
+Exemplo de layout:
+┌─────────────┬─────────────┬─────────────┬─────────────┐
+│ Total: 12 │ Aprovados:8 │ Pendentes:3 │Rejeitados:1 │
+└─────────────┴─────────────┴─────────────┴─────────────┘
 Itens a produzir: 46
 Confirmados: R$ 460,00 | Pendentes: R$ 120,00
 
 **7.3 Botão compartilhar campanha no WhatsApp**
 
-Mesmo bloco do contador. Gerar mensagem automática com dados reais:
+Mesmo bloco do contador. Botão "Compartilhar no WhatsApp" abre
+`https://wa.me/?text={mensagem codificada}` com texto pré-preenchido:
+
 📣 Nossa campanha já está a todo vapor!
-Já temos [X] itens vendidos 🙌
+Já temos [X] itens aprovados 🙌
 Se você ainda não fez seu pedido, ainda dá tempo:
 [LINK DA CAMPANHA /c/:slug]
-🕒 Entrega: [data de entrega, se existir]
+🕒 Entrega: [data de entrega — omitir linha se delivery_at for nulo]
 Compartilhe com quem puder 💛
 
-Botão abre `https://wa.me/?text={mensagem codificada}`.
-Se `delivery_at` for nulo, omitir a linha de entrega.
+[X] = soma de `quantity` dos pedidos `approved`.
 
 **7.4 Remover `window.supabase` global**
 
-Em `src/lib/supabase.js`, remover a exposição global antes do deploy.
-
----
+Em `src/lib/supabase.js`, remover exposição global antes do deploy.
+Verificar se algum outro arquivo depende de `window.supabase` antes de remover.
 
 ## 🔒 Estado Atual de Segurança (Referência)
 
