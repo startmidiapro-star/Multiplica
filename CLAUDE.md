@@ -140,7 +140,7 @@ markdown### ✅ Prioridade 6 — CONCLUÍDA: Dashboard de criação de campanha
 
 **Arquivos envolvidos:** `Home.jsx`, `App.css`, `AdminPage.jsx`
 
-### 🎨 P7.1 — Identidade Visual da Home (em andamento)
+### ✅ P7.1 — CONCLUÍDA: Identidade Visual da Home
 
 **Arquivo:** `src/pages/Home.jsx` e CSS correspondente. Não altere mais nada.
 
