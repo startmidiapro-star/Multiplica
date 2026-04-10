@@ -701,7 +701,8 @@
   opacity: 0.8;
 }
 
-/* Botões: max-width 320px em desktop, centralizados. Mobile: 100% via media query. */
+/* Botões: max-width 320px em desktop, centralizados. Mobile: 100% via media query.
+   margin-top extra para respirar após subheadline. */
 .home-acoes {
   display: flex;
   flex-direction: column;
@@ -709,6 +710,7 @@
   gap: 12px;
   width: 100%;
   max-width: 320px;
+  margin-top: 12px;
 }
 
 .btn-home {
@@ -750,6 +752,21 @@
   color: #ffffff;
 }
 
+/* Dark mode: fundo transparente e borda mais clara para contraste */
+@media (prefers-color-scheme: dark) {
+  .btn-home--secundario {
+    background: transparent;
+    color: #7aaae8;
+    border-color: #7aaae8;
+  }
+
+  .btn-home--secundario:hover,
+  .btn-home--secundario:active {
+    background: #7aaae8;
+    color: #16171d;
+  }
+}
+
 /* Instrução exibida ao clicar em "Já tenho uma campanha" */
 .home-instrucao {
   font-size: 13px;
@@ -779,6 +796,7 @@
   max-width: 640px;
 }
 
+/* align-self: stretch (padrão do grid) garante altura uniforme entre cards */
 .home-card {
   background: var(--code-bg);
   border: 1px solid var(--border);
@@ -787,6 +805,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   text-align: center;
 }
@@ -822,6 +841,7 @@
   font-style: italic;
   font-weight: 700;
   margin: 0;
+  margin-top: 16px;
   text-align: center;
 }
 
