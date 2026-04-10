@@ -717,7 +717,7 @@
   min-height: 48px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 13px;
   font-weight: 600;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
@@ -825,10 +825,18 @@
   text-align: center;
 }
 
-/* Mobile: botões ocupam 100% da tela. Cards mantêm 3 colunas em todas as telas. */
+/* Mobile: botões full width, gap maior entre todos os blocos da home. */
 @media (max-width: 640px) {
   .home-acoes {
     max-width: 100%;
+  }
+
+  .page-home {
+    gap: 48px;
+  }
+
+  .home-conteudo {
+    gap: 32px;
   }
 }
 
