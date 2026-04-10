@@ -701,14 +701,14 @@
   opacity: 0.8;
 }
 
-/* Botões: max-width alinhado aos 3 cards (640px) em desktop, 100% em mobile */
+/* Botões: max-width 320px em desktop, centralizados. Mobile: 100% via media query. */
 .home-acoes {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 640px;
+  max-width: 320px;
 }
 
 .btn-home {
@@ -825,10 +825,10 @@
   text-align: center;
 }
 
-/* Mobile: cards em 1 coluna, botões ocupam 100% da tela */
+/* Mobile: botões ocupam 100% da tela. Cards mantêm 3 colunas em todas as telas. */
 @media (max-width: 640px) {
-  .home-cards {
-    grid-template-columns: 1fr;
+  .home-acoes {
+    max-width: 100%;
   }
 }
 

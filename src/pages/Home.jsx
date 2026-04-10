@@ -4,9 +4,9 @@ import { Link2, TrendingUp, LayoutGrid } from 'lucide-react'
 
 // Benefícios exibidos como cards de 3 colunas
 const beneficios = [
-  { Icone: Link2,      titulo: 'Pedidos',      descricao: '' },
-  { Icone: TrendingUp, titulo: 'Pagamentos',   descricao: '' },
-  { Icone: LayoutGrid, titulo: 'Organização',  descricao: '' },
+  { Icone: Link2,      titulo: 'Pedidos',      descricao: 'Via link' },
+  { Icone: TrendingUp, titulo: 'Pagamentos',   descricao: 'Sem planilhas' },
+  { Icone: LayoutGrid, titulo: 'Organização',  descricao: 'Em tempo real' },
 ]
 
 const Home = () => {
