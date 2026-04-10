@@ -1,5 +1,25 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Link2, TrendingUp, LayoutGrid } from 'lucide-react'
+
+// Benefícios exibidos como cards de 3 colunas
+const beneficios = [
+  {
+    Icone: Link2,
+    titulo: 'Receba pedidos',
+    descricao: 'Com um único link compartilhável',
+  },
+  {
+    Icone: TrendingUp,
+    titulo: 'Acompanhe pagamentos',
+    descricao: 'Com clareza e em tempo real',
+  },
+  {
+    Icone: LayoutGrid,
+    titulo: 'Organize tudo',
+    descricao: 'Sem listas confusas no WhatsApp',
+  },
+]
 
 const Home = () => {
   const navigate = useNavigate()
@@ -7,30 +27,63 @@ const Home = () => {
 
   return (
     <main className="page-home">
-      <h1>Multiplica</h1>
-      <p className="subtitle">Gestão de pedidos comunitários</p>
+      {/* Símbolo: três anéis concêntricos com pulso suave */}
+      <div className="home-simbolo" aria-hidden="true" />
 
-      <div className="home-acoes">
-        <button
-          className="btn-home btn-home--primario"
-          onClick={() => navigate('/nova-campanha')}
-        >
-          Criar nova campanha
-        </button>
+      {/* Título: "multi" escuro + "plica" azul itálico
+          O "i" usa o caractere sem ponto (ı) — ponto azul adicionado via ::after */}
+      <h1 className="home-titulo" aria-label="Multiplica">
+        <span className="home-titulo-escuro">
+          mult<span className="home-titulo-ponto-i">ı</span>
+        </span>
+        <span className="home-titulo-azul">plica</span>
+      </h1>
 
-        <button
-          className="btn-home btn-home--secundario"
-          onClick={() => setMostrarInstrucao((v) => !v)}
-        >
-          Já tenho uma campanha
-        </button>
+      {/* Área de conteúdo — largura compartilhada entre headline, botões e cards */}
+      <div className="home-conteudo">
+        <p className="home-headline">
+          Gerencie vendas e arrecadações da sua comunidade com simplicidade.
+        </p>
+        <p className="home-subheadline">
+          Pedidos, comprovantes e confirmações em um só lugar.
+        </p>
 
-        {mostrarInstrucao && (
-          <p className="home-instrucao">
-            Use o <strong>Link Mágico</strong> que você recebeu ao criar sua campanha.
-            Ele tem o formato <code>/admin/sua-campanha#auth=...</code> e dá acesso direto ao painel.
-          </p>
-        )}
+        {/* Botões de ação */}
+        <div className="home-acoes">
+          <button
+            className="btn-home btn-home--primario"
+            onClick={() => navigate('/nova-campanha')}
+          >
+            Criar nova campanha
+          </button>
+
+          <button
+            className="btn-home btn-home--secundario"
+            onClick={() => setMostrarInstrucao((v) => !v)}
+          >
+            Já tenho uma campanha
+          </button>
+
+          {mostrarInstrucao && (
+            <p className="home-instrucao">
+              Use o <strong>Link Mágico</strong> que você recebeu ao criar sua campanha.
+              Ele tem o formato <code>/admin/sua-campanha#auth=...</code> e dá acesso direto ao painel.
+            </p>
+          )}
+        </div>
+
+        {/* Cards de benefícios — 3 colunas em desktop, 1 coluna em mobile */}
+        <div className="home-cards">
+          {beneficios.map(({ Icone, titulo, descricao }) => (
+            <div key={titulo} className="home-card">
+              <Icone size={22} className="home-card-icone" aria-hidden="true" />
+              <p className="home-card-titulo">{titulo}</p>
+              <p className="home-card-descricao">{descricao}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="home-assinatura">Juntos fazemos mais.</p>
       </div>
     </main>
   )

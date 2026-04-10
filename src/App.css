@@ -630,23 +630,63 @@
 
 /* ── Home ── */
 
+.page-home {
+  gap: 32px;
+}
+
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.home-titulo {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-h);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.home-headline {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.home-subheadline {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin: 0;
+  opacity: 0.8;
+}
+
 .home-acoes {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 320px;
+  max-width: 280px;
 }
 
 .btn-home {
   width: 100%;
-  padding: 14px 20px;
+  padding: 14px 24px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn-home:hover {
+  opacity: 0.88;
 }
 
 .btn-home--primario {
@@ -654,25 +694,20 @@
   color: #ffffff;
 }
 
-.btn-home--primario:hover {
-  background: #1d4ed8;
-}
-
 .btn-home--secundario {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-}
-
-.btn-home--secundario:hover {
-  background: #e5e7eb;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 10px 20px;
 }
 
 .home-instrucao {
-  font-size: 14px;
+  font-size: 13px;
   color: #6b7280;
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.55;
   padding: 12px 16px;
   background: #f9fafb;
   border-radius: 8px;
@@ -680,11 +715,47 @@
 }
 
 .home-instrucao code {
-  font-size: 12px;
+  font-size: 11px;
   background: #e5e7eb;
   padding: 2px 5px;
   border-radius: 4px;
   word-break: break-all;
+}
+
+/* Lista de mini-benefícios */
+.home-beneficios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.home-beneficios li {
+  font-size: 0.88rem;
+  color: var(--text);
+  opacity: 0.7;
+  padding-left: 1.2em;
+  position: relative;
+}
+
+.home-beneficios li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+
+.home-assinatura {
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.45;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
 }
 
 /* ── Criação de Campanha ── */
