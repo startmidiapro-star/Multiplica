@@ -123,6 +123,14 @@ export default function AdminPage() {
   if (error) return <div className="admin-container"><p className="admin-error">{error}</p></div>
   if (!campaign) return <div className="admin-container"><p>Campanha não encontrada</p></div>
 
+  // Totais calculados do array já carregado — sem requisição extra
+  const pedidosAprovados  = orders.filter(o => o.status === 'approved')
+  const pedidosPendentes  = orders.filter(o => o.status === 'pending_payment')
+  const pedidosRejeitados = orders.filter(o => o.status === 'rejected')
+  const itensProduzir     = pedidosAprovados.reduce((acc, o) => acc + (o.quantity || 0), 0)
+  const valorConfirmado   = pedidosAprovados.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0)
+  const valorPendente     = pedidosPendentes.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0)
+
   return (
     <div className="admin-container">
       <header className="admin-header">
@@ -135,6 +143,33 @@ export default function AdminPage() {
           <p>📞 Contato: {campaign.contact_whatsapp}</p>
         )}
       </header>
+
+      {/* Contador operacional — calculado a partir dos pedidos já carregados */}
+      <div className="admin-contador">
+        <div className="admin-contador-cards">
+          <div className="admin-contador-card">
+            <span className="admin-contador-valor">{orders.length}</span>
+            <span className="admin-contador-label">Total</span>
+          </div>
+          <div className="admin-contador-card admin-contador-card--aprovado">
+            <span className="admin-contador-valor">{pedidosAprovados.length}</span>
+            <span className="admin-contador-label">Aprovados</span>
+          </div>
+          <div className="admin-contador-card admin-contador-card--pendente">
+            <span className="admin-contador-valor">{pedidosPendentes.length}</span>
+            <span className="admin-contador-label">Pendentes</span>
+          </div>
+          <div className="admin-contador-card admin-contador-card--rejeitado">
+            <span className="admin-contador-valor">{pedidosRejeitados.length}</span>
+            <span className="admin-contador-label">Rejeitados</span>
+          </div>
+        </div>
+        <div className="admin-contador-resumo">
+          <span>🔨 Itens a produzir: <strong>{itensProduzir}</strong></span>
+          <span>✅ Confirmados: <strong>R$ {valorConfirmado.toFixed(2)}</strong></span>
+          <span>⏳ Pendentes: <strong>R$ {valorPendente.toFixed(2)}</strong></span>
+        </div>
+      </div>
 
       <div className="orders-list">
         <h2>Pedidos ({orders.length})</h2>
