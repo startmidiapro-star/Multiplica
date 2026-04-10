@@ -630,25 +630,76 @@
 
 /* ── Home ── */
 
+@keyframes pulso {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
 .page-home {
   gap: 32px;
 }
 
-.home-hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
+/* Símbolo: círculo central #5a8fdb com dois anéis concêntricos via box-shadow.
+   Diâmetros: 12px (centro) · 20px (anel 1) · 30px (anel 2).
+   Opacidade decrescente nos anéis. Pulso sutil de 2s. */
+.home-simbolo {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #5a8fdb;
+  box-shadow:
+    0 0 0 4px rgba(90, 143, 219, 0.35),
+    0 0 0 9px rgba(90, 143, 219, 0.12);
+  animation: pulso 2s infinite ease-in-out;
+  flex-shrink: 0;
 }
 
+/* Título: Georgia com serifa. "multi" escuro, "plica" azul itálico.
+   O "ı" (i sem ponto) recebe ponto azul via ::after. */
 .home-titulo {
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: 2.8rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--text-h);
   margin: 0;
   line-height: 1.1;
+}
+
+.home-titulo-escuro {
+  color: #1a1a2e;
+}
+
+/* Caractere ı (dotless i) — ponto azul #5a8fdb posicionado acima via ::after */
+.home-titulo-ponto-i {
+  position: relative;
+  display: inline-block;
+  color: #1a1a2e;
+}
+
+.home-titulo-ponto-i::after {
+  content: '';
+  position: absolute;
+  top: 0.06em;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0.2em;
+  height: 0.2em;
+  border-radius: 50%;
+  background: #5a8fdb;
+}
+
+.home-titulo-azul {
+  color: #5a8fdb;
+  font-style: italic;
+}
+
+/* Wrapper que compartilha a largura entre headline, botões e cards */
+.home-conteudo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
 }
 
 .home-headline {
@@ -665,44 +716,52 @@
   opacity: 0.8;
 }
 
+/* Botões: max-width alinhado aos 3 cards (640px) em desktop, 100% em mobile */
 .home-acoes {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 280px;
+  max-width: 640px;
 }
 
 .btn-home {
   width: 100%;
   padding: 14px 24px;
   border-radius: 8px;
-  border: none;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: opacity 0.2s;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.btn-home:hover {
-  opacity: 0.88;
-}
-
+/* Primário: fundo #5a8fdb, texto branco */
 .btn-home--primario {
-  background: #2563eb;
+  background: #5a8fdb;
+  color: #ffffff;
+  border: 1.5px solid #5a8fdb;
+}
+
+.btn-home--primario:hover {
+  background: #5a8fdb;
   color: #ffffff;
 }
 
+/* Secundário: fundo branco, texto #5a8fdb, borda #5a8fdb.
+   Hover: inverte para fundo #5a8fdb, texto branco. */
 .btn-home--secundario {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border);
-  font-weight: 500;
-  font-size: 0.9rem;
-  padding: 10px 20px;
+  background: #ffffff;
+  color: #5a8fdb;
+  border: 1.5px solid #5a8fdb;
 }
 
+.btn-home--secundario:hover {
+  background: #5a8fdb;
+  color: #ffffff;
+}
+
+/* Instrução exibida ao clicar em "Já tenho uma campanha" */
 .home-instrucao {
   font-size: 13px;
   color: #6b7280;
@@ -722,11 +781,20 @@
   word-break: break-all;
 }
 
-/* Lista de mini-benefícios */
-.home-beneficios {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* Cards de benefícios — 3 colunas em desktop */
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 640px;
+}
+
+.home-card {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -734,28 +802,40 @@
   text-align: center;
 }
 
-.home-beneficios li {
+/* Ícone interno em #5a8fdb */
+.home-card-icone {
+  color: #5a8fdb;
+}
+
+.home-card-titulo {
   font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.home-card-descricao {
+  font-size: 0.8rem;
   color: var(--text);
-  opacity: 0.7;
-  padding-left: 1.2em;
-  position: relative;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.home-beneficios li::before {
-  content: '·';
-  position: absolute;
-  left: 0;
-  font-weight: 700;
-}
-
+/* Assinatura: #5a8fdb, itálico, negrito */
 .home-assinatura {
-  font-size: 0.85rem;
-  color: var(--text);
-  opacity: 0.45;
+  font-size: 0.95rem;
+  color: #5a8fdb;
   font-style: italic;
+  font-weight: 700;
   margin: 0;
   text-align: center;
+}
+
+/* Mobile: cards em 1 coluna, botões ocupam 100% da tela */
+@media (max-width: 640px) {
+  .home-cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Criação de Campanha ── */
