@@ -140,33 +140,39 @@ markdown### ✅ Prioridade 6 — CONCLUÍDA: Dashboard de criação de campanha
 
 **Arquivos envolvidos:** `Home.jsx`, `App.css`, `AdminPage.jsx`
 
-### 🎨 P7.1 — Identidade Visual da Home (executar primeiro na P7)
+### 🎨 P7.1 — Identidade Visual da Home (em andamento)
 
 **Arquivo:** `src/pages/Home.jsx` e CSS correspondente. Não altere mais nada.
 
-**Cor principal unificada:** `#5a8fdb` em toda a página — título, ícones, bordas, assinatura, divisor. Exceção: árvore de fundo mantém cor e opacidade atuais, sem alteração.
+**O que já está feito — não toque:**
 
-**Símbolo acima do título:** círculo central `#5a8fdb` de 12px com animação de pulso discreta (`animation: pulse 2s infinite ease-in-out` — sutil, sem distrair). Dois anéis concêntricos ao redor: 20px e 30px de diâmetro, mesma cor, opacidade decrescente. Representa o ponto do "i" expandido.
+- Headline: "Gerencie vendas e arrecadações da sua comunidade com simplicidade."
+- Subheadline: "Pedidos, comprovantes e confirmações em um só lugar."
+- Estrutura JSX completa — não alterar
+- Assinatura "Juntos fazemos mais." em #5a8fdb, itálico, font-weight 700
+- Cards em 3 colunas desktop / 1 coluna mobile
 
-**Título:** fonte Georgia ou similar com serifa. Estrutura: "multi" em `#1a1a2e` + "plica" em `#5a8fdb` itálico. O ponto do "i" em "multi" deve ser destacado em `#5a8fdb` e levemente maior — usar `<span>` com `position: relative` e pseudo-elemento `::after` para substituir o ponto original.
+**O que ainda falta implementar:**
 
-**Botões:**
+**Fonte:** importar Quicksand do Google Fonts. Aplicar no título com font-weight 700.
 
-- Largura máxima igual à largura total dos 3 cards abaixo em desktop
-- Em mobile: largura 100% para facilitar o toque
-- Texto sempre visível sem hover — contraste total
-- Primário: fundo `#5a8fdb`, texto branco, borda `#5a8fdb`
-- Secundário: fundo branco, texto `#5a8fdb`, borda `1.5px solid #5a8fdb`
-- Hover em ambos: fundo `#5a8fdb`, texto branco
-- Transition: `0.2s ease`
+**Título:** "multi" em #1a1a2e claro no dark mode (usar branco ou #f0f0f0). "plica" em #5a8fdb itálico. Ponto do "i" em #5a8fdb levemente maior via ::after.
 
-**Cards:** manter layout 3 colunas. Ícones internos em `#5a8fdb`.
+**Botões — textos atualizados:**
 
-**Assinatura:** "Juntos fazemos mais." em `#5a8fdb`, itálico, font-weight 700.
+- Primário: "Começar Minha Campanha Grátis"
+- Secundário: "Acessar Minha Campanha"
+- Ambos com :active além de hover — para funcionar no touch mobile
+- Mobile: largura 100%, altura mínima 48px, gap 12px entre eles
 
-**Headline:** "Gerencie vendas e arrecadações da sua comunidade com simplicidade."
+**Dark mode — "multi" invisível:**
+Adicionar variável CSS para cor do texto escuro do título mudar para branco no dark mode.
 
-**Subheadline:** "Pedidos, comprovantes e confirmações em um só lugar."
+**Ponto pulsante acima do título:**
+Remover o ponto pulsante separado — o símbolo será reimplementado depois como rede de pontos conectados.
+
+**Cards — simplificar:**
+Apenas ícone + uma palavra: "Pedidos", "Pagamentos", "Organização". Remover textos descritivos dos cards.
 
 **Restrições:** não alterar lógica, rotas, outros componentes ou a árvore de fundo.
 
