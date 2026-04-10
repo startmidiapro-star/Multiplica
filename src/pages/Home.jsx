@@ -4,21 +4,9 @@ import { Link2, TrendingUp, LayoutGrid } from 'lucide-react'
 
 // Benefícios exibidos como cards de 3 colunas
 const beneficios = [
-  {
-    Icone: Link2,
-    titulo: 'Receba pedidos',
-    descricao: 'Com um único link compartilhável',
-  },
-  {
-    Icone: TrendingUp,
-    titulo: 'Acompanhe pagamentos',
-    descricao: 'Com clareza e em tempo real',
-  },
-  {
-    Icone: LayoutGrid,
-    titulo: 'Organize tudo',
-    descricao: 'Sem listas confusas no WhatsApp',
-  },
+  { Icone: Link2,      titulo: 'Pedidos',      descricao: '' },
+  { Icone: TrendingUp, titulo: 'Pagamentos',   descricao: '' },
+  { Icone: LayoutGrid, titulo: 'Organização',  descricao: '' },
 ]
 
 const Home = () => {
@@ -54,14 +42,14 @@ const Home = () => {
             className="btn-home btn-home--primario"
             onClick={() => navigate('/nova-campanha')}
           >
-            Criar nova campanha
+            Começar Minha Campanha Grátis
           </button>
 
           <button
             className="btn-home btn-home--secundario"
             onClick={() => setMostrarInstrucao((v) => !v)}
           >
-            Já tenho uma campanha
+            Acessar Minha Campanha
           </button>
 
           {mostrarInstrucao && (

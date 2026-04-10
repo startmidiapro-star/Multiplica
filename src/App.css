@@ -630,50 +630,35 @@
 
 /* ── Home ── */
 
-@keyframes pulso {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
-
 .page-home {
   gap: 32px;
 }
 
-/* Símbolo: círculo central #5a8fdb com dois anéis concêntricos via box-shadow.
-   Diâmetros: 12px (centro) · 20px (anel 1) · 30px (anel 2).
-   Opacidade decrescente nos anéis. Pulso sutil de 2s. */
+/* Símbolo oculto — será reimplementado como rede de pontos conectados */
 .home-simbolo {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #5a8fdb;
-  box-shadow:
-    0 0 0 4px rgba(90, 143, 219, 0.35),
-    0 0 0 9px rgba(90, 143, 219, 0.12);
-  animation: pulso 2s infinite ease-in-out;
-  flex-shrink: 0;
+  display: none;
 }
 
-/* Título: Georgia com serifa. "multi" escuro, "plica" azul itálico.
-   O "ı" (i sem ponto) recebe ponto azul via ::after. */
+/* Título: Quicksand 700. "multi" em --titulo-escuro (vira branco no dark mode).
+   "plica" em #5a8fdb itálico. O "ı" recebe ponto #5a8fdb levemente maior via ::after. */
 .home-titulo {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Quicksand', sans-serif;
   font-size: 2.8rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0;
   line-height: 1.1;
 }
 
 .home-titulo-escuro {
-  color: #1a1a2e;
+  color: var(--titulo-escuro);
 }
 
 /* Caractere ı (dotless i) — ponto azul #5a8fdb posicionado acima via ::after */
 .home-titulo-ponto-i {
   position: relative;
   display: inline-block;
-  color: #1a1a2e;
+  color: var(--titulo-escuro);
 }
 
 .home-titulo-ponto-i::after {
@@ -682,8 +667,8 @@
   top: 0.06em;
   left: 50%;
   transform: translateX(-50%);
-  width: 0.2em;
-  height: 0.2em;
+  width: 0.22em;
+  height: 0.22em;
   border-radius: 50%;
   background: #5a8fdb;
 }
@@ -729,6 +714,7 @@
 .btn-home {
   width: 100%;
   padding: 14px 24px;
+  min-height: 48px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
@@ -743,20 +729,23 @@
   border: 1.5px solid #5a8fdb;
 }
 
-.btn-home--primario:hover {
-  background: #5a8fdb;
+.btn-home--primario:hover,
+.btn-home--primario:active {
+  background: #4a7fcb;
+  border-color: #4a7fcb;
   color: #ffffff;
 }
 
 /* Secundário: fundo branco, texto #5a8fdb, borda #5a8fdb.
-   Hover: inverte para fundo #5a8fdb, texto branco. */
+   Hover/active: inverte para fundo #5a8fdb, texto branco. */
 .btn-home--secundario {
   background: #ffffff;
   color: #5a8fdb;
   border: 1.5px solid #5a8fdb;
 }
 
-.btn-home--secundario:hover {
+.btn-home--secundario:hover,
+.btn-home--secundario:active {
   background: #5a8fdb;
   color: #ffffff;
 }
@@ -819,6 +808,11 @@
   color: var(--text);
   margin: 0;
   line-height: 1.4;
+}
+
+/* Oculta descrição quando vazia — sem alterar JSX */
+.home-card-descricao:empty {
+  display: none;
 }
 
 /* Assinatura: #5a8fdb, itálico, negrito */
