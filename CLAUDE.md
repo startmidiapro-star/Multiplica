@@ -218,6 +218,147 @@ Compartilhe com quem puder 💛
 Em `src/lib/supabase.js`, remover exposição global antes do deploy.
 Verificar se algum outro arquivo depende de `window.supabase` antes de remover.
 
+### 🔴 Prioridade 8 — Autenticação do Organizador (Login/Senha)
+
+**Escopo:** Refatoração arquitetural. Mudança no núcleo do produto.
+**Não iniciar sem ler tudo abaixo.**
+
+---
+
+**Decisão de produto:**
+
+- Organizadora usa email + senha para criar conta e acessar campanhas
+- Supabase Auth gerencia autenticação — não construir do zero
+- Link Mágico continua funcionando como atalho opcional de acesso rápido
+- Fluxo do comprador permanece Zero-Auth — não alterar
+
+---
+
+**Páginas novas:**
+
+`/cadastro` → `src/pages/Cadastro.jsx`
+
+- Campos: nome, email, senha, confirmar senha
+- Usar `supabase.auth.signUp()`
+- Após cadastro: redirecionar para `/dashboard`
+
+`/login` → `src/pages/Login.jsx`
+
+- Campos: email, senha
+- Link "Esqueci minha senha" → `supabase.auth.resetPasswordForEmail()`
+- Após login: redirecionar para `/dashboard`
+
+`/dashboard` → `src/pages/Dashboard.jsx`
+
+- Lista todas as campanhas do organizador logado
+- Card por campanha: nome, data de entrega, total de pedidos, status
+- Botão "Gerenciar" → abre `/admin/:slug#auth=:token`
+- Botão "Copiar link do comprador"
+- Botão "Nova campanha" → `/nova-campanha`
+- Botão "Sair" → `supabase.auth.signOut()`
+
+---
+
+**Páginas alteradas:**
+
+`Home.jsx`
+
+- Botão "Começar Minha Campanha Grátis" → `/cadastro`
+- Botão "Acessar Minha Campanha" → `/login`
+- Remover lógica de localStorage de campanhas
+
+`CreateCampaign.jsx`
+
+- Verificar sessão ativa antes de renderizar
+- Se não logado → redirecionar para `/login`
+- Ao criar campanha: vincular `user_id` = `auth.uid()`
+- Após criação: redirecionar para `/dashboard`
+
+`AdminPage.jsx`
+
+- Manter validação do Link Mágico (`#auth=token`) como atalho
+- Adicionar validação alternativa via sessão Supabase Auth
+- Se nem token nem sessão → redirecionar para `/login`
+
+---
+
+**Banco de dados:**
+
+```sql
+-- Vincular campanhas ao user_id do Supabase Auth
+ALTER TABLE campaigns
+  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
+
+-- RLS campaigns — SELECT
+DROP POLICY IF EXISTS "Criador pode ler própria campanha" ON campaigns;
+CREATE POLICY "Organizador lê próprias campanhas"
+ON campaigns FOR SELECT
+TO authenticated
+USING (user_id = auth.uid());
+
+-- RLS campaigns — UPDATE
+CREATE POLICY "Organizador atualiza próprias campanhas"
+ON campaigns FOR UPDATE
+TO authenticated
+USING (user_id = auth.uid());
+
+-- Manter SELECT via x-campaign-id para criação (anon)
+-- Manter INSERT aberto para anon
+```
+
+Salvar como `sql/rls_auth.sql` — executar no Supabase após implementação.
+
+---
+
+**Serviços novos:**
+
+`src/services/authService.js`
+
+cadastrar(nome, email, senha)
+entrar(email, senha)
+sair()
+recuperarSenha(email)
+obterSessao()
+
+`src/services/dashboardService.js`
+
+listarCampanhasDoOrganizador()
+→ SELECT \* FROM campaigns WHERE user_id = auth.uid()
+
+---
+
+**Proteção de rotas:**
+
+Criar `src/components/RotaProtegida.jsx`
+
+- Verifica sessão ativa via `supabase.auth.getSession()`
+- Se não logado → redirecionar para `/login`
+- Usar em: `/nova-campanha`, `/dashboard`
+
+---
+
+**Regras críticas:**
+
+- Nunca armazenar senha em texto puro — Supabase Auth cuida disso
+- `manager_token` continua existindo — Link Mágico segue funcionando
+- Fluxo do comprador (`/c/:slug`) não recebe nenhuma alteração
+- Campanhas criadas antes da P8 (sem `user_id`) continuam acessíveis via Link Mágico
+- Comentários em português, variáveis em camelCase português
+
+---
+
+**Ordem de execução:**
+
+1. `authService.js` e `dashboardService.js`
+2. `Cadastro.jsx` e `Login.jsx`
+3. `Dashboard.jsx`
+4. `RotaProtegida.jsx`
+5. Atualizar `Home.jsx`
+6. Atualizar `CreateCampaign.jsx`
+7. Atualizar `AdminPage.jsx`
+8. Executar `sql/rls_auth.sql` no Supabase
+9. Testar fluxo completo — cadastro → login → criar campanha → dashboard → admin
+
 ## 🔒 Estado Atual de Segurança (Referência)
 
 | Item                        | Estado      | Observação                                   |
