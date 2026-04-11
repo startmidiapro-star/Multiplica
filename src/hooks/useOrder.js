@@ -99,7 +99,20 @@ export const useOrder = (slug) => {
     setLoading(true)
     try {
       const quantity = normalizeQuantity(form.quantity)
+
+      // Gera o id do pedido antes do INSERT e persiste no localStorage.
+      // O custom fetch (supabase.js) lê 'multiplica_order_id' a cada requisição
+      // e injeta o header 'x-order-id'. Isso faz a policy de SELECT reconhecer
+      // o pedido recém-criado no RETURNING do INSERT (id::text = x-order-id),
+      // evitando o erro PGRST116 causado pelo SELECT retornar 0 linhas.
+      const novoId = crypto.randomUUID()
+      try {
+        localStorage.setItem(STORAGE_KEY_ORDER_ID, novoId)
+        if (slug) localStorage.setItem(STORAGE_KEY_SLUG, slug)
+      } catch {}
+
       const orderData = {
+        id: novoId,
         campaign_id: campaign.id,
         customer_name: form.customer_name.trim(),
         whatsapp: digitsOnly(form.whatsapp),
@@ -110,12 +123,14 @@ export const useOrder = (slug) => {
       if (order?.id) {
         setOrderId(order.id)
         setShowPix(true)
-        try {
-          localStorage.setItem(STORAGE_KEY_ORDER_ID, order.id)
-          if (slug) localStorage.setItem(STORAGE_KEY_SLUG, slug)
-        } catch {}
         return order
       }
+
+      // INSERT falhou — limpa localStorage para não contaminar sessões futuras
+      try {
+        localStorage.removeItem(STORAGE_KEY_ORDER_ID)
+        localStorage.removeItem(STORAGE_KEY_SLUG)
+      } catch {}
       setError('Não foi possível gerar o pedido. Tente novamente.')
       return null
     } catch (err) {
@@ -124,7 +139,7 @@ export const useOrder = (slug) => {
     } finally {
       setLoading(false)
     }
-  }, [campaign, form, isFormValid])
+  }, [campaign, form, isFormValid, slug])
 
   const handleFileUpload = useCallback(async (file, id) => {
     if (!file) {
