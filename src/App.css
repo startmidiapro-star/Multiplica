@@ -472,6 +472,34 @@
   }
 }
 
+/* ── Botão compartilhar WhatsApp P7.3 ── */
+.btn-compartilhar-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #25d366;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  align-self: flex-start;
+  transition: background 0.15s;
+}
+
+.btn-compartilhar-whatsapp:hover,
+.btn-compartilhar-whatsapp:active {
+  background: #1ebe5d;
+}
+
+@media (max-width: 480px) {
+  .btn-compartilhar-whatsapp {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .orders-list {
   display: flex;
   flex-direction: column;

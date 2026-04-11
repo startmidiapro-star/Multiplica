@@ -66,7 +66,3 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
-// Expor globalmente para debug (remover depois)
-if (typeof window !== 'undefined') {
-  window.supabase = supabase
-}

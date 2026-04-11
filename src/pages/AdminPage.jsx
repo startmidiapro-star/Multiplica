@@ -131,6 +131,19 @@ export default function AdminPage() {
   const valorConfirmado   = pedidosAprovados.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0)
   const valorPendente     = pedidosPendentes.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0)
 
+  // Mensagem de compartilhamento no WhatsApp (P7.3)
+  const linkCampanha = `${window.location.origin}/c/${campaign.slug}`
+  const linhaEntrega = campaign.delivery_at
+    ? `\n🕒 Entrega: ${new Date(campaign.delivery_at).toLocaleDateString('pt-BR')}`
+    : ''
+  const mensagemCompartilhar =
+    `📣 Nossa campanha já está a todo vapor!\n` +
+    `Já temos ${itensProduzir} itens aprovados 🙌\n` +
+    `Se você ainda não fez seu pedido, ainda dá tempo:\n` +
+    `${linkCampanha}` +
+    `${linhaEntrega}\n` +
+    `Compartilhe com quem puder 💛`
+
   return (
     <div className="admin-container">
       <header className="admin-header">
@@ -169,6 +182,16 @@ export default function AdminPage() {
           <span>✅ Confirmados: <strong>R$ {valorConfirmado.toFixed(2)}</strong></span>
           <span>⏳ Pendentes: <strong>R$ {valorPendente.toFixed(2)}</strong></span>
         </div>
+
+        {/* Botão compartilhar campanha no WhatsApp (P7.3) */}
+        <a
+          href={`https://wa.me/?text=${encodeURIComponent(mensagemCompartilhar)}`}
+          className="btn-compartilhar-whatsapp"
+          target="_blank"
+          rel="noreferrer"
+        >
+          📲 Compartilhar no WhatsApp
+        </a>
       </div>
 
       <div className="orders-list">
