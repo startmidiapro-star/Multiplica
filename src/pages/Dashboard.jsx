@@ -102,6 +102,13 @@ export default function Dashboard() {
                 </span>
               </div>
 
+              <p className="dashboard-card-pedidos">
+                📦{' '}
+                {campanha.totalPedidos === 1
+                  ? '1 pedido'
+                  : `${campanha.totalPedidos} pedidos`}
+              </p>
+
               {campanha.delivery_at && (
                 <p className="dashboard-card-entrega">
                   📅 Entrega:{' '}

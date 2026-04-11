@@ -1460,6 +1460,12 @@
   border: 1px solid #e5e7eb;
 }
 
+.dashboard-card-pedidos {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
 .dashboard-card-entrega {
   font-size: 13px;
   color: #6b7280;
