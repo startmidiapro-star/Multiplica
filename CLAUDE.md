@@ -136,7 +136,7 @@ markdown### ✅ Prioridade 6 — CONCLUÍDA: Dashboard de criação de campanha
 
 ---
 
-### 🟡 Prioridade 7 — PRÓXIMA: Home + Contador + Compartilhar
+### ✅ Prioridade 7 — CONCLUÍDA: Home + Contador + Compartilhar
 
 **Arquivos envolvidos:** `Home.jsx`, `App.css`, `AdminPage.jsx`
 
