@@ -2,7 +2,8 @@ import { supabase } from '../lib/supabase.js'
 import { gerarSlug } from '../utils/index.js'
 
 /**
- * Busca campanha pelo slug.
+ * Busca campanha pelo slug — colunas explícitas, sem manager_token.
+ * Usado no fluxo do comprador (anon): expor manager_token seria risco de segurança.
  * @param {string} slug - Slug da campanha
  * @returns {Promise<object|null>} Dados da campanha ou null
  */
@@ -10,7 +11,7 @@ export const getCampaignBySlug = async (slug) => {
   try {
     const { data, error } = await supabase
       .from('campaigns')
-      .select('*')
+      .select('id, name, slug, price, item_name, pix_key, delivery_at, contact_whatsapp')
       .eq('slug', slug)
       .single()
 
