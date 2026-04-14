@@ -10,7 +10,6 @@ import { formatWhatsApp, digitsOnly } from '../utils/index.js'
 
 const estadoInicialFormulario = {
   nome: '',
-  itemVendido: '',
   precoUnitario: '',
   chavePix: '',
   dataEntrega: '',
@@ -63,7 +62,6 @@ export default function CreateCampaign() {
   function formularioValido() {
     return (
       form.nome.trim().length > 0 &&
-      form.itemVendido.trim().length > 0 &&
       Number(form.precoUnitario) > 0 &&
       form.chavePix.trim().length > 0
     )
@@ -80,7 +78,6 @@ export default function CreateCampaign() {
     try {
       const campanha = await criarCampanha({
         nome: form.nome.trim(),
-        itemVendido: form.itemVendido.trim(),
         precoUnitario: Number(form.precoUnitario),
         chavePix: form.chavePix.trim(),
         dataEntrega: form.dataEntrega || null,
@@ -191,17 +188,6 @@ export default function CreateCampaign() {
               value={form.nome}
               onChange={(e) => handleChange('nome', e.target.value)}
               placeholder="Ex: Pastel da Dona Neide"
-              required
-            />
-          </label>
-
-          <label>
-            Item vendido *
-            <input
-              type="text"
-              value={form.itemVendido}
-              onChange={(e) => handleChange('itemVendido', e.target.value)}
-              placeholder="Ex: Pastel de queijo"
               required
             />
           </label>
