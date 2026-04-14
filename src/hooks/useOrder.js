@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 // TODO: comprimir imagem antes do upload para <300kb
 import imageCompression from 'browser-image-compression'
-import { getCampaignBySlug, createOrder, uploadProof, getOrderStatus, getOrderById } from '../services/campaignService.js'
+import { getCampaignBySlug, createOrder, uploadProof, getOrderStatus, getOrderById, buscarOpcoesCampanha } from '../services/campaignService.js'
 import { digitsOnly, normalizeQuantity } from '../utils/index.js'
 
 const initialFormState = {
@@ -41,6 +41,9 @@ export const useOrder = (slug) => {
   const [proofSent, setProofSent] = useState(false)
   const [order, setOrder] = useState(null)
   const [orderStatus, setOrderStatus] = useState('pending_payment')
+  // Opções/variações da campanha e a opção escolhida pelo comprador
+  const [opcoes, setOpcoes] = useState([])
+  const [opcaoSelecionada, setOpcaoSelecionada] = useState('')
 
   const total = campaign
     ? (form.quantity || MIN_QUANTITY) * (campaign.price ?? 0)
@@ -58,7 +61,11 @@ export const useOrder = (slug) => {
         setCampaign(data)
         if (!data) {
           setError('Campanha não encontrada.')
+          return
         }
+        // Carrega as opções/variações da campanha para o dropdown do comprador
+        const opts = await buscarOpcoesCampanha(data.id)
+        setOpcoes(opts)
       } catch (err) {
         setError('Erro ao carregar campanha.')
         setCampaign(null)
@@ -86,8 +93,10 @@ export const useOrder = (slug) => {
     const nameOk = form.customer_name?.trim().length > 0
     const whatsappOk = digitsOnly(form.whatsapp).length >= 10
     const quantityOk = (form.quantity || MIN_QUANTITY) >= MIN_QUANTITY
-    return nameOk && whatsappOk && quantityOk
-  }, [form])
+    // Dropdown obrigatório apenas quando a campanha tem opções configuradas
+    const opcaoOk = opcoes.length === 0 || opcaoSelecionada.trim().length > 0
+    return nameOk && whatsappOk && quantityOk && opcaoOk
+  }, [form, opcoes, opcaoSelecionada])
 
   const generatePix = useCallback(async () => {
     if (!campaign) return null
@@ -118,6 +127,8 @@ export const useOrder = (slug) => {
         whatsapp: digitsOnly(form.whatsapp),
         quantity,
         total_price: quantity * (campaign.price ?? 0),
+        // Inclui a opção escolhida — null quando a campanha não tem variações
+        selected_option: opcaoSelecionada || null,
       }
       const order = await createOrder(orderData)
       if (order?.id) {
@@ -139,7 +150,7 @@ export const useOrder = (slug) => {
     } finally {
       setLoading(false)
     }
-  }, [campaign, form, isFormValid, slug])
+  }, [campaign, form, isFormValid, opcaoSelecionada, slug])
 
   const handleFileUpload = useCallback(async (file, id) => {
     if (!file) {
@@ -284,5 +295,8 @@ export const useOrder = (slug) => {
     handleProofUpload,
     resetOrder,
     isFormValid,
+    opcoes,
+    opcaoSelecionada,
+    setOpcaoSelecionada,
   }
 }

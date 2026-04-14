@@ -28,6 +28,9 @@ const OrderPage = () => {
     handleSubmit,
     handleProofUpload,
     resetOrder,
+    opcoes,
+    opcaoSelecionada,
+    setOpcaoSelecionada,
   } = useOrder(slug)
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
@@ -144,6 +147,26 @@ const OrderPage = () => {
                   required
                 />
               </label>
+
+              {/* Dropdown de opções — exibido apenas quando a campanha tem variações */}
+              {opcoes.length > 0 && (
+                <label>
+                  Opção *
+                  <select
+                    value={opcaoSelecionada}
+                    onChange={(e) => setOpcaoSelecionada(e.target.value)}
+                    required
+                    className="order-select"
+                  >
+                    <option value="">Escolha uma opção</option>
+                    {opcoes.map((opcao) => (
+                      <option key={opcao.id} value={opcao.label}>
+                        {opcao.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
 
               <p className="total">Total: R$ {total.toFixed(2)}</p>
 

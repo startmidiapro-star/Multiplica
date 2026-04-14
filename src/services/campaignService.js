@@ -186,6 +186,33 @@ export async function criarCampanha(dados) {
 }
 
 /**
+ * Busca as opções/variações de uma campanha, ordenadas por sort_order.
+ * Usado pelo comprador para popular o dropdown de seleção.
+ *
+ * @param {string} campaignId - ID da campanha
+ * @returns {Promise<Array>} Lista de opções [{ id, label, sort_order }]
+ */
+export async function buscarOpcoesCampanha(campaignId) {
+  try {
+    const { data, error } = await supabase
+      .from('campaign_options')
+      .select('id, label, sort_order')
+      .eq('campaign_id', campaignId)
+      .order('sort_order', { ascending: true })
+
+    if (error) {
+      console.error('[campaignService] buscarOpcoesCampanha:', error.message)
+      return []
+    }
+
+    return data ?? []
+  } catch (err) {
+    console.error('[campaignService] buscarOpcoesCampanha:', err)
+    return []
+  }
+}
+
+/**
  * Insere as opções/variações de uma campanha na tabela campaign_options.
  * Chamada logo após criarCampanha() — só funciona com organizador autenticado.
  *
