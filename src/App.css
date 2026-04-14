@@ -64,6 +64,14 @@
   color: var(--text);
 }
 
+.campaign-item-description {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
 .chave-pix {
   font-size: 0.9rem;
   word-break: break-all;

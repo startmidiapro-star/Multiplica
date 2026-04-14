@@ -103,6 +103,9 @@ const OrderPage = () => {
           <>
             <section className="campaign-info">
               <h1>{campaign.name}</h1>
+              {campaign.item_description && (
+                <p className="campaign-item-description">{campaign.item_description}</p>
+              )}
             </section>
 
             <form
@@ -212,6 +215,9 @@ const OrderPage = () => {
     <main className="page-order">
       <div className="order-page">
         <h2>{campaign?.name}</h2>
+        {campaign?.item_description && (
+          <p className="campaign-item-description">{campaign.item_description}</p>
+        )}
         {campaign?.delivery_at && (
           <p className="delivery-date">📅 Entrega: {new Date(campaign.delivery_at).toLocaleDateString('pt-BR')}</p>
         )}
