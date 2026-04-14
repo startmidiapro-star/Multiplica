@@ -196,7 +196,7 @@ export async function buscarOpcoesCampanha(campaignId) {
   try {
     const { data, error } = await supabase
       .from('campaign_options')
-      .select('id, label, sort_order')
+      .select('id, label, price, sort_order')
       .eq('campaign_id', campaignId)
       .order('sort_order', { ascending: true })
 
@@ -217,15 +217,17 @@ export async function buscarOpcoesCampanha(campaignId) {
  * Chamada logo após criarCampanha() — só funciona com organizador autenticado.
  *
  * @param {string} campaignId - ID da campanha recém-criada
- * @param {string[]} opcoes   - Labels das opções (ex: ['Carne', 'Queijo'])
+ * @param {{label: string, price: string}[]} opcoes - Opções com label e preço opcional
  * @returns {Promise<boolean>} true se inserido com sucesso, false em caso de erro
  */
 export async function inserirOpcoesCampanha(campaignId, opcoes) {
   if (!opcoes || opcoes.length === 0) return true
 
-  const registros = opcoes.map((label, index) => ({
+  const registros = opcoes.map((opcao, index) => ({
     campaign_id: campaignId,
-    label: label.trim(),
+    label: opcao.label.trim(),
+    // price null = usar o preço padrão da campanha
+    price: opcao.price !== '' && opcao.price != null ? Number(opcao.price) : null,
     sort_order: index,
   }))
 

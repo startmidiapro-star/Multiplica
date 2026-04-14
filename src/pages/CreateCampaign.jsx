@@ -25,9 +25,10 @@ export default function CreateCampaign() {
   const [erro, setErro] = useState(null)
   // 'comprador' | 'admin' | null — controla feedback do botão copiar
   const [copiado, setCopiado] = useState(null)
-  // Opções/variações da campanha (ex: ['Carne', 'Queijo'])
+  // Opções/variações da campanha: [{label: string, price: string}]
+  // price vazio = usar o preço padrão da campanha
   const [opcoes, setOpcoes] = useState([])
-  const [novaOpcao, setNovaOpcao] = useState('')
+  const [novaOpcao, setNovaOpcao] = useState({ label: '', price: '' })
 
   const linkComprador = campanhaCriada
     ? `${window.location.origin}/c/${campanhaCriada.slug}`
@@ -41,12 +42,12 @@ export default function CreateCampaign() {
   }
 
   function adicionarOpcao() {
-    const label = novaOpcao.trim()
+    const label = novaOpcao.label.trim()
     if (!label) return
     // Evita duplicatas (case-insensitive)
-    if (opcoes.some((o) => o.toLowerCase() === label.toLowerCase())) return
-    setOpcoes((prev) => [...prev, label])
-    setNovaOpcao('')
+    if (opcoes.some((o) => o.label.toLowerCase() === label.toLowerCase())) return
+    setOpcoes((prev) => [...prev, { label, price: novaOpcao.price.trim() }])
+    setNovaOpcao({ label: '', price: '' })
   }
 
   function removerOpcao(idx) {
@@ -249,21 +250,32 @@ export default function CreateCampaign() {
             />
           </label>
 
-          {/* Opções/variações — ex: Carne, Queijo, Frango */}
+          {/* Opções/variações — ex: Carne R$10, Queijo R$12, Frango (preço padrão) */}
           <div className="create-opcoes-secao">
             <span className="create-opcoes-titulo">Opções / Variações</span>
-            <p className="create-opcoes-dica">
-              Deixe em branco se não houver. Ex: Carne, Queijo, Frango.
-            </p>
             <div className="create-opcoes-input-linha">
               <input
                 type="text"
                 className="create-opcao-input"
-                value={novaOpcao}
-                onChange={(e) => setNovaOpcao(e.target.value)}
+                value={novaOpcao.label}
+                onChange={(e) =>
+                  setNovaOpcao((prev) => ({ ...prev, label: e.target.value }))
+                }
                 onKeyDown={handleOpcaoKeyDown}
                 placeholder="Ex: Carne"
                 maxLength={60}
+              />
+              <input
+                type="number"
+                className="create-opcao-preco-input"
+                value={novaOpcao.price}
+                onChange={(e) =>
+                  setNovaOpcao((prev) => ({ ...prev, price: e.target.value }))
+                }
+                onKeyDown={handleOpcaoKeyDown}
+                placeholder="R$ preço"
+                min="0"
+                step="0.01"
               />
               <button
                 type="button"
@@ -273,16 +285,24 @@ export default function CreateCampaign() {
                 + Adicionar
               </button>
             </div>
+            <p className="create-opcoes-dica">
+              Deixe o preço em branco para usar o valor padrão da campanha.
+            </p>
             {opcoes.length > 0 && (
               <div className="create-opcoes-lista">
                 {opcoes.map((opcao, idx) => (
                   <span key={idx} className="create-opcao-tag">
-                    {opcao}
+                    {opcao.label}
+                    {opcao.price && (
+                      <span className="create-opcao-tag-preco">
+                        R$ {Number(opcao.price).toFixed(2)}
+                      </span>
+                    )}
                     <button
                       type="button"
                       className="create-opcao-remover"
                       onClick={() => removerOpcao(idx)}
-                      aria-label={`Remover ${opcao}`}
+                      aria-label={`Remover ${opcao.label}`}
                     >
                       ×
                     </button>
