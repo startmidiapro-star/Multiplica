@@ -1620,6 +1620,15 @@
   font-size: 14px;
 }
 
+.dashboard-erro {
+  color: #b91c1c;
+  font-size: 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
 .dashboard-vazio {
   display: flex;
   flex-direction: column;
@@ -1677,6 +1686,11 @@
   background: #f9fafb;
   color: #6b7280;
   border: 1px solid #e5e7eb;
+}
+
+.dashboard-card-preco {
+  font-size: 13px;
+  color: #6b7280;
 }
 
 .dashboard-card-pedidos {

@@ -12,14 +12,21 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [campanhas, setCampanhas] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
   // slug da campanha cujo link foi copiado — volta a null após 2s
   const [copiado, setCopiado] = useState(null)
 
   useEffect(() => {
-    listarCampanhasDoOrganizador().then((dados) => {
-      setCampanhas(dados)
-      setCarregando(false)
-    })
+    listarCampanhasDoOrganizador()
+      .then((dados) => {
+        setCampanhas(dados)
+      })
+      .catch(() => {
+        setErro('Não foi possível carregar as campanhas. Tente recarregar a página.')
+      })
+      .finally(() => {
+        setCarregando(false)
+      })
   }, [])
 
   async function handleSair() {
@@ -50,6 +57,25 @@ export default function Dashboard() {
     window.location.href = `/admin/${campanha.slug}#auth=${campanha.manager_token}`
   }
 
+  if (carregando) {
+    return (
+      <main className="page-dashboard">
+        <p className="dashboard-carregando">Carregando...</p>
+      </main>
+    )
+  }
+
+  if (erro) {
+    return (
+      <main className="page-dashboard">
+        <p className="dashboard-erro">{erro}</p>
+        <button className="btn-nova-campanha-dashboard" onClick={() => window.location.reload()}>
+          Tentar novamente
+        </button>
+      </main>
+    )
+  }
+
   return (
     <main className="page-dashboard">
       <header className="dashboard-header">
@@ -67,9 +93,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {carregando && <p className="dashboard-carregando">Carregando...</p>}
-
-      {!carregando && campanhas.length === 0 && (
+      {campanhas.length === 0 && (
         <div className="dashboard-vazio">
           <p>Você ainda não tem campanhas.</p>
           <button
@@ -102,8 +126,11 @@ export default function Dashboard() {
                 </span>
               </div>
 
+              <p className="dashboard-card-preco">
+                R$ {Number(campanha.price).toFixed(2)} por unidade
+              </p>
+
               <p className="dashboard-card-pedidos">
-                📦{' '}
                 {campanha.totalPedidos === 1
                   ? '1 pedido'
                   : `${campanha.totalPedidos} pedidos`}
@@ -111,7 +138,7 @@ export default function Dashboard() {
 
               {campanha.delivery_at && (
                 <p className="dashboard-card-entrega">
-                  📅 Entrega:{' '}
+                  Entrega:{' '}
                   {new Date(campanha.delivery_at).toLocaleDateString('pt-BR')}
                 </p>
               )}
@@ -127,7 +154,7 @@ export default function Dashboard() {
                   className="btn-copiar-link"
                   onClick={() => copiarLinkComprador(campanha.slug)}
                 >
-                  {copiado === campanha.slug ? '✅ Copiado!' : 'Copiar link'}
+                  {copiado === campanha.slug ? 'Copiado!' : 'Copiar link'}
                 </button>
               </div>
             </div>
