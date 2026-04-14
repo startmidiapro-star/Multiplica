@@ -116,11 +116,13 @@ export const uploadProof = async (file, orderId) => {
  * Cria uma nova campanha e retorna os dados incluindo o manager_token.
  *
  * Fluxo de segurança:
- *   1. Gera o id da campanha no frontend com crypto.randomUUID()
- *   2. Persiste o id em sessionStorage como 'multiplica_campaign_id_temp'
- *   3. O custom fetch em supabase.js injeta 'x-campaign-id' em cada request
- *   4. A policy RLS em campaigns permite SELECT somente onde id = x-campaign-id
- *   5. Após o SELECT, limpa sessionStorage — header deixa de ser enviado
+ *   1. Obtém o user_id do organizador via supabase.auth.getUser()
+ *   2. Gera o id da campanha no frontend com crypto.randomUUID()
+ *   3. Persiste o id em sessionStorage como 'multiplica_campaign_id_temp'
+ *   4. O custom fetch em supabase.js injeta 'x-campaign-id' em cada request
+ *   5. INSERT exige authenticated + user_id = auth.uid() (RLS P8)
+ *   6. SELECT pós-INSERT satisfeito pela policy authenticated (user_id = auth.uid())
+ *   7. Após o SELECT, limpa sessionStorage — header deixa de ser enviado
  *
  * O manager_token é gerado pelo banco (gen_random_uuid()) — nunca pelo frontend.
  *
@@ -130,6 +132,10 @@ export const uploadProof = async (file, orderId) => {
 export async function criarCampanha(dados) {
   const idCampanha = crypto.randomUUID()
   const slug = gerarSlug(dados.nome)
+
+  // Obtém o user_id do organizador logado — obrigatório para satisfazer a RLS de INSERT
+  const { data: dadosAuth } = await supabase.auth.getUser()
+  const userId = dadosAuth?.user?.id ?? null
 
   // Persiste temporariamente para injeção do header x-campaign-id
   try {
@@ -149,6 +155,7 @@ export async function criarCampanha(dados) {
         delivery_at: dados.dataEntrega || null,
         contact_whatsapp: dados.whatsapp || null,
         slug,
+        user_id: userId,
       })
 
     if (erroInsert) {

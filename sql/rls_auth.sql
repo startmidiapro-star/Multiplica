@@ -14,8 +14,8 @@
 --      e as policies existentes (TO anon) deixam de se aplicar
 --
 -- Políticas anon existentes são mantidas intactas:
---   - campaigns INSERT aberto para anon  (criação sem conta)
---   - campaigns SELECT via x-campaign-id (fluxo de criação)
+--   - campaigns SELECT via x-campaign-id (fluxo de criação — anon lê o manager_token gerado)
+--   - campaigns SELECT por slug para compradores (USING true, colunas sem manager_token)
 --   - orders INSERT aberto para anon     (comprador sem conta)
 --   - orders SELECT via x-order-id / x-manager-token (comprador e admin por link)
 --   - orders UPDATE via x-manager-token  (admin por link)
@@ -31,6 +31,9 @@
 
 -- campaigns: qualquer usuário podia ler qualquer campanha
 DROP POLICY IF EXISTS "Enable read access for all users" ON campaigns;
+
+-- campaigns: INSERT aberto para anon — substituído por policy autenticada (P8)
+DROP POLICY IF EXISTS "Qualquer um pode criar campanha" ON campaigns;
 
 -- orders: qualquer usuário podia atualizar qualquer pedido
 DROP POLICY IF EXISTS "Allow update orders"      ON orders;
@@ -55,6 +58,22 @@ CREATE POLICY "Comprador lê campanha pelo slug"
 ON campaigns FOR SELECT
 TO anon
 USING (true);
+
+
+-- =============================================================================
+-- 1b. CAMPAIGNS — INSERT restrito a organizadores autenticados
+-- =============================================================================
+--
+-- Substitui a policy anon "Qualquer um pode criar campanha" (removida acima).
+-- WITH CHECK garante que user_id inserido corresponde ao uid do token JWT.
+-- O frontend (criarCampanha) obtém auth.uid() via supabase.auth.getUser()
+-- antes do INSERT e envia o valor no campo user_id.
+--
+DROP POLICY IF EXISTS "Organizador cria campanha" ON campaigns;
+CREATE POLICY "Organizador cria campanha"
+ON campaigns FOR INSERT
+TO authenticated
+WITH CHECK (user_id = auth.uid());
 
 
 -- =============================================================================
