@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link2, TrendingUp, LayoutGrid } from 'lucide-react'
 
@@ -11,7 +10,6 @@ const beneficios = [
 
 const Home = () => {
   const navigate = useNavigate()
-  const [mostrarInstrucao, setMostrarInstrucao] = useState(false)
 
   return (
     <main className="page-home">
@@ -47,17 +45,10 @@ const Home = () => {
 
           <button
             className="btn-home btn-home--secundario"
-            onClick={() => setMostrarInstrucao((v) => !v)}
+            onClick={() => navigate('/login')}
           >
             Acessar Minha Campanha
           </button>
-
-          {mostrarInstrucao && (
-            <p className="home-instrucao">
-              Use o <strong>Link Mágico</strong> que você recebeu ao criar sua campanha.
-              Ele tem o formato <code>/admin/sua-campanha#auth=...</code> e dá acesso direto ao painel.
-            </p>
-          )}
         </div>
 
         {/* Cards de benefícios — 3 colunas em desktop, 1 coluna em mobile */}
