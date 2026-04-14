@@ -5,7 +5,7 @@
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { criarCampanha } from '../services/campaignService.js'
+import { criarCampanha, inserirOpcoesCampanha } from '../services/campaignService.js'
 import { formatWhatsApp, digitsOnly } from '../utils/index.js'
 
 const estadoInicialFormulario = {
@@ -25,6 +25,9 @@ export default function CreateCampaign() {
   const [erro, setErro] = useState(null)
   // 'comprador' | 'admin' | null — controla feedback do botão copiar
   const [copiado, setCopiado] = useState(null)
+  // Opções/variações da campanha (ex: ['Carne', 'Queijo'])
+  const [opcoes, setOpcoes] = useState([])
+  const [novaOpcao, setNovaOpcao] = useState('')
 
   const linkComprador = campanhaCriada
     ? `${window.location.origin}/c/${campanhaCriada.slug}`
@@ -35,6 +38,26 @@ export default function CreateCampaign() {
 
   function handleChange(campo, valor) {
     setForm((prev) => ({ ...prev, [campo]: valor }))
+  }
+
+  function adicionarOpcao() {
+    const label = novaOpcao.trim()
+    if (!label) return
+    // Evita duplicatas (case-insensitive)
+    if (opcoes.some((o) => o.toLowerCase() === label.toLowerCase())) return
+    setOpcoes((prev) => [...prev, label])
+    setNovaOpcao('')
+  }
+
+  function removerOpcao(idx) {
+    setOpcoes((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  function handleOpcaoKeyDown(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      adicionarOpcao()
+    }
   }
 
   function formularioValido() {
@@ -67,6 +90,12 @@ export default function CreateCampaign() {
         setErro('Não foi possível criar a campanha. Tente novamente.')
         return
       }
+
+      // Insere as opções/variações vinculadas à campanha (não-bloqueante para o fluxo)
+      if (opcoes.length > 0) {
+        await inserirOpcoesCampanha(campanha.id, opcoes)
+      }
+
       setCampanhaCriada(campanha)
     } catch (err) {
       console.error('[CreateCampaign] handleSubmit:', err)
@@ -219,6 +248,49 @@ export default function CreateCampaign() {
               placeholder="(00) 00000-0000"
             />
           </label>
+
+          {/* Opções/variações — ex: Carne, Queijo, Frango */}
+          <div className="create-opcoes-secao">
+            <span className="create-opcoes-titulo">Opções / Variações</span>
+            <p className="create-opcoes-dica">
+              Deixe em branco se não houver. Ex: Carne, Queijo, Frango.
+            </p>
+            <div className="create-opcoes-input-linha">
+              <input
+                type="text"
+                className="create-opcao-input"
+                value={novaOpcao}
+                onChange={(e) => setNovaOpcao(e.target.value)}
+                onKeyDown={handleOpcaoKeyDown}
+                placeholder="Ex: Carne"
+                maxLength={60}
+              />
+              <button
+                type="button"
+                className="btn-adicionar-opcao"
+                onClick={adicionarOpcao}
+              >
+                + Adicionar
+              </button>
+            </div>
+            {opcoes.length > 0 && (
+              <div className="create-opcoes-lista">
+                {opcoes.map((opcao, idx) => (
+                  <span key={idx} className="create-opcao-tag">
+                    {opcao}
+                    <button
+                      type="button"
+                      className="create-opcao-remover"
+                      onClick={() => removerOpcao(idx)}
+                      aria-label={`Remover ${opcao}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           {erro && <p className="create-erro">{erro}</p>}
 

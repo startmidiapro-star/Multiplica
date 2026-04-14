@@ -185,6 +185,35 @@ export async function criarCampanha(dados) {
   }
 }
 
+/**
+ * Insere as opções/variações de uma campanha na tabela campaign_options.
+ * Chamada logo após criarCampanha() — só funciona com organizador autenticado.
+ *
+ * @param {string} campaignId - ID da campanha recém-criada
+ * @param {string[]} opcoes   - Labels das opções (ex: ['Carne', 'Queijo'])
+ * @returns {Promise<boolean>} true se inserido com sucesso, false em caso de erro
+ */
+export async function inserirOpcoesCampanha(campaignId, opcoes) {
+  if (!opcoes || opcoes.length === 0) return true
+
+  const registros = opcoes.map((label, index) => ({
+    campaign_id: campaignId,
+    label: label.trim(),
+    sort_order: index,
+  }))
+
+  const { error } = await supabase
+    .from('campaign_options')
+    .insert(registros)
+
+  if (error) {
+    console.error('[campaignService] inserirOpcoesCampanha:', error.message)
+    return false
+  }
+
+  return true
+}
+
 export async function getOrderById(orderId) {
   try {
     const { data, error } = await supabase
