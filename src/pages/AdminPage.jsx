@@ -131,6 +131,14 @@ export default function AdminPage() {
   const valorConfirmado   = pedidosAprovados.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0)
   const valorPendente     = pedidosPendentes.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0)
 
+  // Breakdown por opção — apenas pedidos aprovados com selected_option preenchido
+  const itensPorOpcao = pedidosAprovados.reduce((acc, o) => {
+    if (!o.selected_option) return acc
+    acc[o.selected_option] = (acc[o.selected_option] || 0) + (o.quantity || 0)
+    return acc
+  }, {})
+  const temOpcoes = Object.keys(itensPorOpcao).length > 0
+
   // Mensagem de compartilhamento no WhatsApp (P7.3)
   const linkCampanha = `${window.location.origin}/c/${campaign.slug}`
   const linhaEntrega = campaign.delivery_at
@@ -183,6 +191,20 @@ export default function AdminPage() {
           <span>⏳ Pendentes: <strong>R$ {valorPendente.toFixed(2)}</strong></span>
         </div>
 
+        {/* Breakdown por opção — exibido apenas quando há variações nos pedidos aprovados */}
+        {temOpcoes && (
+          <div className="admin-contador-opcoes">
+            <span className="admin-contador-opcoes-titulo">Produção por variação (aprovados):</span>
+            <div className="admin-contador-opcoes-lista">
+              {Object.entries(itensPorOpcao).map(([opcao, qtd]) => (
+                <span key={opcao} className="admin-contador-opcao-badge">
+                  <strong>{qtd}</strong> {opcao}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Botão compartilhar campanha no WhatsApp (P7.3) */}
         <a
           href={`https://wa.me/?text=${encodeURIComponent(mensagemCompartilhar)}`}
@@ -217,7 +239,14 @@ export default function AdminPage() {
             </div>
 
             <div className="order-details">
-              <p>📦 {order.quantity} unidade(s) — R$ {order.total_price}</p>
+              <p>
+                📦 {order.quantity}×
+                {order.selected_option
+                  ? <span className="order-opcao-badge">{order.selected_option}</span>
+                  : ' unidade(s)'
+                }
+                {' '}— R$ {order.total_price}
+              </p>
               <p>📞 {order.whatsapp}</p>
               <p>📅 Pedido: {new Date(order.created_at).toLocaleDateString('pt-BR')}</p>
             </div>

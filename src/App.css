@@ -499,6 +499,64 @@
   color: #111827;
 }
 
+/* ── Breakdown por opção no contador ── */
+
+.admin-contador-opcoes {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-contador-opcoes-titulo {
+  font-size: 12px;
+  font-weight: 600;
+  color: #065f46;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-contador-opcoes-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-contador-opcao-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #166534;
+}
+
+.admin-contador-opcao-badge strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: #15803d;
+}
+
+/* Badge de opção inline no card de pedido */
+.order-opcao-badge {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 1px 8px;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e40af;
+  vertical-align: middle;
+}
+
 @media (max-width: 480px) {
   .admin-contador-cards {
     grid-template-columns: repeat(2, 1fr);
