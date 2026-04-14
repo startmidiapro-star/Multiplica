@@ -45,11 +45,17 @@ export const useOrder = (slug) => {
   const [opcoes, setOpcoes] = useState([])
   const [opcaoSelecionada, setOpcaoSelecionada] = useState('')
 
-  // Usa o preço da opção selecionada quando disponível; senão, usa o da campanha
-  const opcaoComPreco = opcoes.find((o) => o.label === opcaoSelecionada && o.price != null)
-  const precoPorUnidade = opcaoComPreco != null
-    ? Number(opcaoComPreco.price)
-    : (campaign?.price ?? 0)
+  // Resolve o preço por unidade de forma defensiva:
+  //   1. Parseia campaign.price explicitamente — pode vir como string do Supabase
+  //   2. Usa o preço da opção selecionada se válido; senão, usa o padrão da campanha
+  const _precoCampanha = Number(campaign?.price)
+  const _precoPadrao = Number.isFinite(_precoCampanha) ? _precoCampanha : 0
+  const _opcaoDisplay = opcaoSelecionada
+    ? opcoes.find((o) => o.label === opcaoSelecionada)
+    : null
+  const _precoOpcao = _opcaoDisplay?.price != null ? Number(_opcaoDisplay.price) : null
+  const precoPorUnidade =
+    _precoOpcao != null && Number.isFinite(_precoOpcao) ? _precoOpcao : _precoPadrao
 
   const total = campaign
     ? (form.quantity || MIN_QUANTITY) * precoPorUnidade
@@ -126,11 +132,32 @@ export const useOrder = (slug) => {
         if (slug) localStorage.setItem(STORAGE_KEY_SLUG, slug)
       } catch {}
 
-      // Preço por unidade: opção selecionada (quando tem preço próprio) ou padrão da campanha
-      const opcaoEscolhida = opcoes.find((o) => o.label === opcaoSelecionada && o.price != null)
-      const precoUnidade = opcaoEscolhida != null
-        ? Number(opcaoEscolhida.price)
-        : (campaign.price ?? 0)
+      // Resolve o preço por unidade de forma defensiva antes do INSERT:
+      //   - Number() converte strings e null de forma previsível
+      //   - Number.isFinite() rejeita NaN, Infinity e undefined
+      //   - Fallback garante que campaign.price é sempre o último recurso
+      const precoCampanha = Number(campaign.price)
+      const precoPadrao = Number.isFinite(precoCampanha) ? precoCampanha : 0
+
+      const opcaoEscolhida = opcaoSelecionada
+        ? opcoes.find((o) => o.label === opcaoSelecionada)
+        : null
+      const precoOpcaoRaw = opcaoEscolhida?.price != null ? Number(opcaoEscolhida.price) : null
+      const precoUnidade =
+        precoOpcaoRaw != null && Number.isFinite(precoOpcaoRaw) ? precoOpcaoRaw : precoPadrao
+
+      const totalPrice = quantity * precoUnidade
+
+      // Guarda final: bloqueia INSERT se o total for inválido (NaN, negativo, Infinity)
+      if (!Number.isFinite(totalPrice) || totalPrice < 0) {
+        console.error('[useOrder] total_price inválido:', { totalPrice, precoUnidade, quantity })
+        setError('Não foi possível calcular o valor total. Verifique o preço da campanha.')
+        try {
+          localStorage.removeItem(STORAGE_KEY_ORDER_ID)
+          localStorage.removeItem(STORAGE_KEY_SLUG)
+        } catch {}
+        return null
+      }
 
       const orderData = {
         id: novoId,
@@ -138,7 +165,7 @@ export const useOrder = (slug) => {
         customer_name: form.customer_name.trim(),
         whatsapp: digitsOnly(form.whatsapp),
         quantity,
-        total_price: quantity * precoUnidade,
+        total_price: totalPrice,
         // Inclui a opção escolhida — null quando a campanha não tem variações
         selected_option: opcaoSelecionada || null,
       }
