@@ -1284,6 +1284,28 @@
 
 /* ── Opções/Variações da campanha ── */
 
+/* Campo de preço padrão com subtexto explicativo */
+.create-campo-preco {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.create-campo-preco label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.create-campo-preco-dica {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
 .create-opcoes-secao {
   display: flex;
   flex-direction: column;
@@ -1380,13 +1402,40 @@
   font-weight: 500;
 }
 
+/* Tag com preço próprio (âmbar) — sobrescreve o preço padrão */
+.create-opcao-tag--proprio {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #92400e;
+}
+
 .create-opcao-tag-preco {
   font-size: 11px;
-  font-weight: 600;
-  background: #bfdbfe;
-  color: #1e3a8a;
+  font-weight: 700;
+  background: #fed7aa;
+  color: #92400e;
   padding: 1px 6px;
   border-radius: 10px;
+}
+
+/* Badge "padrão" dentro da tag azul */
+.create-opcao-tag-padrao {
+  font-size: 11px;
+  font-weight: 500;
+  color: #93c5fd;
+  opacity: 0.9;
+}
+
+/* Aviso de mix de preços */
+.create-opcoes-aviso-preco {
+  font-size: 12px;
+  color: #92400e;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-left: 3px solid #f59e0b;
+  border-radius: 6px;
+  padding: 8px 12px;
+  line-height: 1.5;
 }
 
 .create-opcao-remover {
@@ -1425,15 +1474,40 @@
     color: #f1f5f9;
   }
 
+  .create-campo-preco label {
+    color: #e2e8f0;
+  }
+
+  .create-campo-preco-dica {
+    color: #94a3b8;
+  }
+
   .create-opcao-preco-input {
     background: #0f172a;
     border-color: #475569;
     color: #f1f5f9;
   }
 
+  .create-opcao-tag--proprio {
+    background: #431407;
+    border-color: #92400e;
+    color: #fcd34d;
+  }
+
   .create-opcao-tag-preco {
-    background: #1e3a5f;
-    color: #93c5fd;
+    background: #78350f;
+    color: #fcd34d;
+  }
+
+  .create-opcao-tag-padrao {
+    color: #60a5fa;
+  }
+
+  .create-opcoes-aviso-preco {
+    background: #431407;
+    border-color: #92400e;
+    border-left-color: #f59e0b;
+    color: #fcd34d;
   }
 
   .btn-adicionar-opcao {

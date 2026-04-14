@@ -207,18 +207,23 @@ export default function CreateCampaign() {
             />
           </label>
 
-          <label>
-            Preço unitário (R$) *
-            <input
-              type="number"
-              min="0.01"
-              step="0.01"
-              value={form.precoUnitario}
-              onChange={(e) => handleChange('precoUnitario', e.target.value)}
-              placeholder="0,00"
-              required
-            />
-          </label>
+          <div className="create-campo-preco">
+            <label>
+              Preço padrão por unidade (R$) *
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={form.precoUnitario}
+                onChange={(e) => handleChange('precoUnitario', e.target.value)}
+                placeholder="0,00"
+                required
+              />
+            </label>
+            <p className="create-campo-preco-dica">
+              Aplicado automaticamente nas opções sem preço próprio definido.
+            </p>
+          </div>
 
           <label>
             Chave Pix *
@@ -288,27 +293,49 @@ export default function CreateCampaign() {
             <p className="create-opcoes-dica">
               Deixe o preço em branco para usar o valor padrão da campanha.
             </p>
+
             {opcoes.length > 0 && (
-              <div className="create-opcoes-lista">
-                {opcoes.map((opcao, idx) => (
-                  <span key={idx} className="create-opcao-tag">
-                    {opcao.label}
-                    {opcao.price && (
-                      <span className="create-opcao-tag-preco">
-                        R$ {Number(opcao.price).toFixed(2)}
+              <>
+                <div className="create-opcoes-lista">
+                  {opcoes.map((opcao, idx) => {
+                    const temPrecoProrio = opcao.price !== ''
+                    return (
+                      <span
+                        key={idx}
+                        className={`create-opcao-tag ${temPrecoProrio ? 'create-opcao-tag--proprio' : ''}`}
+                      >
+                        {opcao.label}
+                        {temPrecoProrio ? (
+                          <span className="create-opcao-tag-preco">
+                            R$ {Number(opcao.price).toFixed(2)}
+                          </span>
+                        ) : (
+                          <span className="create-opcao-tag-padrao">padrão</span>
+                        )}
+                        <button
+                          type="button"
+                          className="create-opcao-remover"
+                          onClick={() => removerOpcao(idx)}
+                          aria-label={`Remover ${opcao.label}`}
+                        >
+                          ×
+                        </button>
                       </span>
-                    )}
-                    <button
-                      type="button"
-                      className="create-opcao-remover"
-                      onClick={() => removerOpcao(idx)}
-                      aria-label={`Remover ${opcao.label}`}
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
+                    )
+                  })}
+                </div>
+
+                {/* Aviso quando há mix de preços próprios e padrão */}
+                {opcoes.some((o) => o.price !== '') && (
+                  <div className="create-opcoes-aviso-preco">
+                    Opções em laranja têm preço próprio e substituem o valor padrão
+                    {form.precoUnitario
+                      ? ` (R$ ${Number(form.precoUnitario).toFixed(2)})`
+                      : ''
+                    } apenas para aquele item.
+                  </div>
+                )}
+              </>
             )}
           </div>
 
