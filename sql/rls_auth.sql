@@ -2,7 +2,11 @@
 -- Execute este arquivo no SQL Editor do Supabase Dashboard.
 --
 -- O que este arquivo faz:
---   1. Adiciona coluna user_id em campaigns (vincula campanha ao organizador)
+--   1. Adiciona colunas em campaigns:
+--        user_id    UUID          → vincula campanha ao organizador (auth.users)
+--        options    TEXT          → configurações opcionais em formato livre
+--        plan_type  TEXT          → plano da campanha (default: 'free')
+--        is_premium BOOLEAN       → flag de acesso a recursos premium (default: false)
 --   2. Adiciona policies de SELECT e UPDATE para organizadores autenticados
 --      em campaigns — cobrindo campanhas novas (user_id) e antigas (manager_token)
 --   3. Adiciona policies de SELECT e UPDATE para organizadores autenticados
@@ -54,13 +58,27 @@ USING (true);
 
 
 -- =============================================================================
--- 2. CAMPAIGNS — adiciona coluna user_id
+-- 2. CAMPAIGNS — adiciona colunas de schema
 -- =============================================================================
 
+-- user_id: UUID vinculado ao auth.users — identifica o organizador dono da campanha
+-- Nullable para não quebrar campanhas criadas antes da P8 (sem conta)
 ALTER TABLE campaigns
   ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
 
--- Índice para acelerar o JOIN em orders (queries do dashboard)
+-- options: campo livre para configurações extras (JSON string, feature flags, etc.)
+ALTER TABLE campaigns
+  ADD COLUMN IF NOT EXISTS options TEXT;
+
+-- plan_type: plano da campanha — 'free' por padrão, extensível para 'pro', 'team', etc.
+ALTER TABLE campaigns
+  ADD COLUMN IF NOT EXISTS plan_type TEXT NOT NULL DEFAULT 'free';
+
+-- is_premium: flag booleana para acesso a recursos premium
+ALTER TABLE campaigns
+  ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT false;
+
+-- Índice em user_id para acelerar o JOIN nas queries do dashboard
 CREATE INDEX IF NOT EXISTS idx_campaigns_user_id ON campaigns(user_id);
 
 
