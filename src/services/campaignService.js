@@ -11,7 +11,7 @@ export const getCampaignBySlug = async (slug) => {
   try {
     const { data, error } = await supabase
       .from('campaigns')
-      .select('id, name, slug, price, pix_key, delivery_at, contact_whatsapp')
+      .select('id, name, slug, price, item_description, pix_key, delivery_at, contact_whatsapp')
       .eq('slug', slug)
       .single()
 
@@ -126,7 +126,7 @@ export const uploadProof = async (file, orderId) => {
  *
  * O manager_token é gerado pelo banco (gen_random_uuid()) — nunca pelo frontend.
  *
- * @param {object} dados - { nome, precoUnitario, chavePix, dataEntrega, whatsapp }
+ * @param {object} dados - { nome, itemDescription, precoUnitario, chavePix, dataEntrega, whatsapp }
  * @returns {Promise<object|null>} Campanha criada (com manager_token) ou null
  */
 export async function criarCampanha(dados) {
@@ -149,6 +149,7 @@ export async function criarCampanha(dados) {
       .insert({
         id: idCampanha,
         name: dados.nome,
+        item_description: dados.itemDescription || null,
         price: dados.precoUnitario,
         pix_key: dados.chavePix,
         delivery_at: dados.dataEntrega || null,
