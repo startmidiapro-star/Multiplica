@@ -161,7 +161,9 @@ const OrderPage = () => {
                     <option value="">Escolha uma opção</option>
                     {opcoes.map((opcao) => (
                       <option key={opcao.id} value={opcao.label}>
-                        {opcao.label}
+                        {opcao.price != null
+                          ? `${opcao.label} — R$ ${Number(opcao.price).toFixed(2)}`
+                          : opcao.label}
                       </option>
                     ))}
                   </select>

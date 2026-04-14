@@ -45,8 +45,14 @@ export const useOrder = (slug) => {
   const [opcoes, setOpcoes] = useState([])
   const [opcaoSelecionada, setOpcaoSelecionada] = useState('')
 
+  // Usa o preço da opção selecionada quando disponível; senão, usa o da campanha
+  const opcaoComPreco = opcoes.find((o) => o.label === opcaoSelecionada && o.price != null)
+  const precoPorUnidade = opcaoComPreco != null
+    ? Number(opcaoComPreco.price)
+    : (campaign?.price ?? 0)
+
   const total = campaign
-    ? (form.quantity || MIN_QUANTITY) * (campaign.price ?? 0)
+    ? (form.quantity || MIN_QUANTITY) * precoPorUnidade
     : 0
 
   const hasValidOrderId = Boolean(orderId)
@@ -120,13 +126,19 @@ export const useOrder = (slug) => {
         if (slug) localStorage.setItem(STORAGE_KEY_SLUG, slug)
       } catch {}
 
+      // Preço por unidade: opção selecionada (quando tem preço próprio) ou padrão da campanha
+      const opcaoEscolhida = opcoes.find((o) => o.label === opcaoSelecionada && o.price != null)
+      const precoUnidade = opcaoEscolhida != null
+        ? Number(opcaoEscolhida.price)
+        : (campaign.price ?? 0)
+
       const orderData = {
         id: novoId,
         campaign_id: campaign.id,
         customer_name: form.customer_name.trim(),
         whatsapp: digitsOnly(form.whatsapp),
         quantity,
-        total_price: quantity * (campaign.price ?? 0),
+        total_price: quantity * precoUnidade,
         // Inclui a opção escolhida — null quando a campanha não tem variações
         selected_option: opcaoSelecionada || null,
       }
@@ -150,7 +162,7 @@ export const useOrder = (slug) => {
     } finally {
       setLoading(false)
     }
-  }, [campaign, form, isFormValid, opcaoSelecionada, slug])
+  }, [campaign, form, isFormValid, opcoes, opcaoSelecionada, slug])
 
   const handleFileUpload = useCallback(async (file, id) => {
     if (!file) {
