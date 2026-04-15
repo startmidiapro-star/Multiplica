@@ -25,10 +25,11 @@ export default function CreateCampaign() {
   const [erro, setErro] = useState(null)
   // 'comprador' | 'admin' | null — controla feedback do botão copiar
   const [copiado, setCopiado] = useState(null)
-  // Opções/variações da campanha: [{label: string, price: string}]
+  // Sabores/variantes da campanha: [{name: string, price: string}]
   // price vazio = usar o preço padrão da campanha
-  const [opcoes, setOpcoes] = useState([])
-  const [novaOpcao, setNovaOpcao] = useState({ label: '', price: '' })
+  const [temVariantes, setTemVariantes] = useState(false)
+  const [variantes, setVariantes] = useState([])
+  const [novaVariante, setNovaVariante] = useState({ name: '', price: '' })
 
   const linkComprador = campanhaCriada
     ? `${window.location.origin}/c/${campanhaCriada.slug}`
@@ -41,23 +42,23 @@ export default function CreateCampaign() {
     setForm((prev) => ({ ...prev, [campo]: valor }))
   }
 
-  function adicionarOpcao() {
-    const label = novaOpcao.label.trim()
-    if (!label) return
+  function adicionarVariante() {
+    const name = novaVariante.name.trim()
+    if (!name) return
     // Evita duplicatas (case-insensitive)
-    if (opcoes.some((o) => o.label.toLowerCase() === label.toLowerCase())) return
-    setOpcoes((prev) => [...prev, { label, price: novaOpcao.price.trim() }])
-    setNovaOpcao({ label: '', price: '' })
+    if (variantes.some((v) => v.name.toLowerCase() === name.toLowerCase())) return
+    setVariantes((prev) => [...prev, { name, price: novaVariante.price.trim() }])
+    setNovaVariante({ name: '', price: '' })
   }
 
-  function removerOpcao(idx) {
-    setOpcoes((prev) => prev.filter((_, i) => i !== idx))
+  function removerVariante(idx) {
+    setVariantes((prev) => prev.filter((_, i) => i !== idx))
   }
 
-  function handleOpcaoKeyDown(e) {
+  function handleVarianteKeyDown(e) {
     if (e.key === 'Enter') {
       e.preventDefault()
-      adicionarOpcao()
+      adicionarVariante()
     }
   }
 
@@ -92,9 +93,12 @@ export default function CreateCampaign() {
         return
       }
 
-      // Insere as opções/variações vinculadas à campanha (não-bloqueante para o fluxo)
-      if (opcoes.length > 0) {
-        await inserirOpcoesCampanha(campanha.id, opcoes)
+      // Insere as variantes vinculadas à campanha (mapeia name → label esperado pelo serviço)
+      if (temVariantes && variantes.length > 0) {
+        await inserirOpcoesCampanha(
+          campanha.id,
+          variantes.map((v) => ({ label: v.name, price: v.price }))
+        )
       }
 
       setCampanhaCriada(campanha)
@@ -255,89 +259,103 @@ export default function CreateCampaign() {
             />
           </label>
 
-          {/* Opções/variações — ex: Carne R$10, Queijo R$12, Frango (preço padrão) */}
-          <div className="create-opcoes-secao">
-            <span className="create-opcoes-titulo">Opções / Variações</span>
-            <div className="create-opcoes-input-linha">
-              <input
-                type="text"
-                className="create-opcao-input"
-                value={novaOpcao.label}
-                onChange={(e) =>
-                  setNovaOpcao((prev) => ({ ...prev, label: e.target.value }))
-                }
-                onKeyDown={handleOpcaoKeyDown}
-                placeholder="Ex: Carne"
-                maxLength={60}
-              />
-              <input
-                type="number"
-                className="create-opcao-preco-input"
-                value={novaOpcao.price}
-                onChange={(e) =>
-                  setNovaOpcao((prev) => ({ ...prev, price: e.target.value }))
-                }
-                onKeyDown={handleOpcaoKeyDown}
-                placeholder="R$ preço"
-                min="0"
-                step="0.01"
-              />
-              <button
-                type="button"
-                className="btn-adicionar-opcao"
-                onClick={adicionarOpcao}
-              >
-                + Adicionar
-              </button>
-            </div>
-            <p className="create-opcoes-dica">
-              Deixe o preço em branco para usar o valor padrão da campanha.
-            </p>
+          {/* Checkbox: produto com sabores/variantes */}
+          <label className="create-variantes-checkbox-label">
+            <input
+              type="checkbox"
+              checked={temVariantes}
+              onChange={(e) => {
+                setTemVariantes(e.target.checked)
+                if (!e.target.checked) setVariantes([])
+              }}
+            />
+            Produto com sabores / variantes
+          </label>
 
-            {opcoes.length > 0 && (
-              <>
-                <div className="create-opcoes-lista">
-                  {opcoes.map((opcao, idx) => {
-                    const temPrecoProrio = opcao.price !== ''
-                    return (
-                      <span
-                        key={idx}
-                        className={`create-opcao-tag ${temPrecoProrio ? 'create-opcao-tag--proprio' : ''}`}
-                      >
-                        {opcao.label}
-                        {temPrecoProrio ? (
-                          <span className="create-opcao-tag-preco">
-                            R$ {Number(opcao.price).toFixed(2)}
-                          </span>
-                        ) : (
-                          <span className="create-opcao-tag-padrao">padrão</span>
-                        )}
-                        <button
-                          type="button"
-                          className="create-opcao-remover"
-                          onClick={() => removerOpcao(idx)}
-                          aria-label={`Remover ${opcao.label}`}
+          {/* Seção de variantes — exibida apenas quando checkbox marcado */}
+          {temVariantes && (
+            <div className="create-opcoes-secao">
+              <div className="create-opcoes-input-linha">
+                <input
+                  type="text"
+                  className="create-opcao-input"
+                  value={novaVariante.name}
+                  onChange={(e) =>
+                    setNovaVariante((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  onKeyDown={handleVarianteKeyDown}
+                  placeholder="Ex: Carne"
+                  maxLength={60}
+                />
+                <input
+                  type="number"
+                  className="create-opcao-preco-input"
+                  value={novaVariante.price}
+                  onChange={(e) =>
+                    setNovaVariante((prev) => ({ ...prev, price: e.target.value }))
+                  }
+                  onKeyDown={handleVarianteKeyDown}
+                  placeholder="R$ preço"
+                  min="0"
+                  step="0.01"
+                />
+                <button
+                  type="button"
+                  className="btn-adicionar-opcao"
+                  onClick={adicionarVariante}
+                >
+                  + Adicionar sabor
+                </button>
+              </div>
+              <p className="create-opcoes-dica">
+                Deixe o preço em branco para usar o valor padrão da campanha.
+              </p>
+
+              {variantes.length > 0 && (
+                <>
+                  <div className="create-opcoes-lista">
+                    {variantes.map((variante, idx) => {
+                      const temPrecoProrio = variante.price !== ''
+                      return (
+                        <span
+                          key={idx}
+                          className={`create-opcao-tag ${temPrecoProrio ? 'create-opcao-tag--proprio' : ''}`}
                         >
-                          ×
-                        </button>
-                      </span>
-                    )
-                  })}
-                </div>
-
-                {/* Aviso quando há mix de preços próprios e padrão */}
-                {opcoes.some((o) => o.price !== '') && (
-                  <div className="create-opcoes-aviso-preco">
-                    Opções em laranja têm preço próprio e substituem o valor padrão
-                    {form.precoUnitario
-                      ? ` (R$ ${Number(form.precoUnitario).toFixed(2)})`
-                      : ''
-                    } apenas para aquele item.
+                          {variante.name}
+                          {temPrecoProrio ? (
+                            <span className="create-opcao-tag-preco">
+                              R$ {Number(variante.price).toFixed(2)}
+                            </span>
+                          ) : (
+                            <span className="create-opcao-tag-padrao">padrão</span>
+                          )}
+                          <button
+                            type="button"
+                            className="create-opcao-remover"
+                            onClick={() => removerVariante(idx)}
+                            aria-label={`Remover ${variante.name}`}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      )
+                    })}
                   </div>
-                )}
-              </>
-            )}
-          </div>
+
+                  {/* Aviso quando há mix de preços próprios e padrão */}
+                  {variantes.some((v) => v.price !== '') && (
+                    <div className="create-opcoes-aviso-preco">
+                      Sabores em laranja têm preço próprio e substituem o valor padrão
+                      {form.precoUnitario
+                        ? ` (R$ ${Number(form.precoUnitario).toFixed(2)})`
+                        : ''
+                      } apenas para aquele item.
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {erro && <p className="create-erro">{erro}</p>}
 
