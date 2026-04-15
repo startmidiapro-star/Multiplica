@@ -42,6 +42,10 @@ const OrderPage = () => {
   }, [slug, fetchCampaign])
 
   useEffect(() => {
+    console.log('Opções carregadas:', opcoes)
+  }, [opcoes])
+
+  useEffect(() => {
     if (showPix && pixRef.current) {
       pixRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }

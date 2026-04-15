@@ -34,6 +34,8 @@ export const getCampaignBySlug = async (slug) => {
  */
 export const createOrder = async (orderData) => {
   try {
+    console.log('Tentando inserir:', orderData)
+    console.log('Sessão atual:', await supabase.auth.getSession())
     const { data, error } = await supabase
       .from('orders')
       .insert(orderData)
