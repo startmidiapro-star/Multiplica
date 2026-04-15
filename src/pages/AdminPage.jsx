@@ -239,14 +239,25 @@ export default function AdminPage() {
             </div>
 
             <div className="order-details">
-              <p>
-                📦 {order.quantity}×
-                {order.selected_option
-                  ? <span className="order-opcao-badge">{order.selected_option}</span>
-                  : ' unidade(s)'
-                }
-                {' '}— R$ {order.total_price}
-              </p>
+              {order.items_detail?.length > 0 ? (
+                <p>
+                  📦 {order.items_detail.map((item, i) => (
+                    <span key={item.name}>
+                      {i > 0 && ', '}
+                      <strong>{item.qty}×</strong> {item.name} (R$ {Number(item.price).toFixed(2)})
+                    </span>
+                  ))} — R$ {Number(order.total_price).toFixed(2)}
+                </p>
+              ) : (
+                <p>
+                  📦 {order.quantity}×
+                  {order.selected_option
+                    ? <span className="order-opcao-badge">{order.selected_option}</span>
+                    : ' unidade(s)'
+                  }
+                  {' '}— R$ {order.total_price}
+                </p>
+              )}
               <p>📞 {order.whatsapp}</p>
               <p>📅 Pedido: {new Date(order.created_at).toLocaleDateString('pt-BR')}</p>
             </div>
