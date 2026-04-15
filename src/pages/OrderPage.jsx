@@ -31,6 +31,8 @@ const OrderPage = () => {
     opcoes,
     opcaoSelecionada,
     setOpcaoSelecionada,
+    itemsDetail,
+    alterarQtdVariante,
   } = useOrder(slug)
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
@@ -141,40 +143,68 @@ const OrderPage = () => {
                 />
               </label>
 
-              <label>
-                Quantidade
-                <input
-                  type="number"
-                  min="1"
-                  value={form.quantity}
-                  onChange={(e) =>
-                    handleChange('quantity', e.target.value)
-                  }
-                  placeholder="1"
-                  required
-                />
-              </label>
+              {/* Modo variantes: botões +/- por sabor */}
+              {campaign.has_variants ? (
+                <div className="variants-list">
+                  {itemsDetail.map((item) => (
+                    <div key={item.name} className="variant-row">
+                      <div className="variant-info">
+                        <span className="variant-name">{item.name}</span>
+                        <span className="variant-price">R$ {item.price.toFixed(2)}</span>
+                      </div>
+                      <div className="variant-qty-control">
+                        <button
+                          type="button"
+                          className="variant-qty-btn"
+                          onClick={() => alterarQtdVariante(item.name, -1)}
+                          disabled={item.qty === 0}
+                        >−</button>
+                        <span className="variant-qty-value">{item.qty}</span>
+                        <button
+                          type="button"
+                          className="variant-qty-btn"
+                          onClick={() => alterarQtdVariante(item.name, +1)}
+                        >+</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <label>
+                    Quantidade
+                    <input
+                      type="number"
+                      min="1"
+                      value={form.quantity}
+                      onChange={(e) => handleChange('quantity', e.target.value)}
+                      placeholder="1"
+                      required
+                    />
+                  </label>
 
-              {/* Dropdown de opções — exibido apenas quando a campanha tem variações */}
-              {opcoes.length > 0 && (
-                <label>
-                  Opção *
-                  <select
-                    value={opcaoSelecionada}
-                    onChange={(e) => setOpcaoSelecionada(e.target.value)}
-                    required
-                    className="order-select"
-                  >
-                    <option value="">Escolha uma opção</option>
-                    {opcoes.map((opcao) => (
-                      <option key={opcao.id} value={opcao.label}>
-                        {opcao.price != null
-                          ? `${opcao.label} — R$ ${Number(opcao.price).toFixed(2)}`
-                          : opcao.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                  {/* Dropdown de opções — exibido apenas quando a campanha tem variações */}
+                  {opcoes.length > 0 && (
+                    <label>
+                      Opção *
+                      <select
+                        value={opcaoSelecionada}
+                        onChange={(e) => setOpcaoSelecionada(e.target.value)}
+                        required
+                        className="order-select"
+                      >
+                        <option value="">Escolha uma opção</option>
+                        {opcoes.map((opcao) => (
+                          <option key={opcao.id} value={opcao.label}>
+                            {opcao.price != null
+                              ? `${opcao.label} — R$ ${Number(opcao.price).toFixed(2)}`
+                              : opcao.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                </>
               )}
 
               <p className="total">Total: R$ {total.toFixed(2)}</p>

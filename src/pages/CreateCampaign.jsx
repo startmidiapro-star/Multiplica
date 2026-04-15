@@ -87,6 +87,7 @@ export default function CreateCampaign() {
         chavePix: form.chavePix.trim(),
         dataEntrega: form.dataEntrega || null,
         whatsapp: digitsOnly(form.whatsapp) || null,
+        hasVariantes: temVariantes,
       })
       if (!campanha) {
         setErro('Não foi possível criar a campanha. Tente novamente.')

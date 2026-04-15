@@ -44,6 +44,8 @@ export const useOrder = (slug) => {
   // Opções/variações da campanha e a opção escolhida pelo comprador
   const [opcoes, setOpcoes] = useState([])
   const [opcaoSelecionada, setOpcaoSelecionada] = useState('')
+  // Modo variantes: lista com quantidade por sabor — [{name, price, qty}]
+  const [itemsDetail, setItemsDetail] = useState([])
 
   // Resolve o preço por unidade de forma defensiva:
   //   1. Parseia campaign.price explicitamente — pode vir como string do Supabase
@@ -58,7 +60,9 @@ export const useOrder = (slug) => {
     _precoOpcao != null && Number.isFinite(_precoOpcao) ? _precoOpcao : _precoPadrao
 
   const total = campaign
-    ? (form.quantity || MIN_QUANTITY) * precoPorUnidade
+    ? campaign.has_variants
+      ? itemsDetail.reduce((acc, item) => acc + item.price * item.qty, 0)
+      : (form.quantity || MIN_QUANTITY) * precoPorUnidade
     : 0
 
   const hasValidOrderId = Boolean(orderId)
@@ -104,11 +108,15 @@ export const useOrder = (slug) => {
   const isFormValid = useCallback(() => {
     const nameOk = form.customer_name?.trim().length > 0
     const whatsappOk = digitsOnly(form.whatsapp).length >= 10
+    // Modo variantes: ao menos um sabor deve ter qty > 0
+    if (campaign?.has_variants) {
+      return nameOk && whatsappOk && itemsDetail.some((item) => item.qty > 0)
+    }
     const quantityOk = (form.quantity || MIN_QUANTITY) >= MIN_QUANTITY
     // Dropdown obrigatório apenas quando a campanha tem opções configuradas
     const opcaoOk = opcoes.length === 0 || opcaoSelecionada.trim().length > 0
     return nameOk && whatsappOk && quantityOk && opcaoOk
-  }, [form, opcoes, opcaoSelecionada])
+  }, [form, opcoes, opcaoSelecionada, campaign, itemsDetail])
 
   const generatePix = useCallback(async () => {
     if (!campaign) return null
@@ -131,6 +139,54 @@ export const useOrder = (slug) => {
         localStorage.setItem(STORAGE_KEY_ORDER_ID, novoId)
         if (slug) localStorage.setItem(STORAGE_KEY_SLUG, slug)
       } catch {}
+
+      // ── Modo variantes: calcula total a partir de itemsDetail ─────────────
+      if (campaign.has_variants) {
+        const itensSelecionados = itemsDetail.filter((item) => item.qty > 0)
+        const totalPrice = itensSelecionados.reduce(
+          (acc, item) => acc + item.price * item.qty,
+          0
+        )
+
+        if (!Number.isFinite(totalPrice) || totalPrice < 0) {
+          console.error('[useOrder] total_price inválido (variantes):', { totalPrice, itensSelecionados })
+          setError('Não foi possível calcular o valor total.')
+          try {
+            localStorage.removeItem(STORAGE_KEY_ORDER_ID)
+            localStorage.removeItem(STORAGE_KEY_SLUG)
+          } catch {}
+          return null
+        }
+
+        const quantidadeTotal = itensSelecionados.reduce((acc, item) => acc + item.qty, 0)
+        const orderData = {
+          id: novoId,
+          campaign_id: campaign.id,
+          customer_name: form.customer_name.trim(),
+          whatsapp: digitsOnly(form.whatsapp),
+          quantity: quantidadeTotal,
+          total_price: totalPrice,
+          selected_option: null,
+          items_detail: itensSelecionados,
+        }
+
+        console.log('[useOrder] generatePix variantes — pré-insert:', orderData)
+
+        const order = await createOrder(orderData)
+        if (order?.id) {
+          setOrderId(order.id)
+          setShowPix(true)
+          return order
+        }
+
+        try {
+          localStorage.removeItem(STORAGE_KEY_ORDER_ID)
+          localStorage.removeItem(STORAGE_KEY_SLUG)
+        } catch {}
+        setError('Não foi possível gerar o pedido. Tente novamente.')
+        return null
+      }
+      // ── Fim modo variantes ────────────────────────────────────────────────
 
       // Resolve o preço por unidade de forma defensiva antes do INSERT:
       //   - Number() converte strings e null de forma previsível
@@ -203,7 +259,7 @@ export const useOrder = (slug) => {
     } finally {
       setLoading(false)
     }
-  }, [campaign, form, isFormValid, opcoes, opcaoSelecionada, slug])
+  }, [campaign, form, isFormValid, opcoes, opcaoSelecionada, itemsDetail, slug])
 
   const handleFileUpload = useCallback(async (file, id) => {
     if (!file) {
@@ -257,6 +313,35 @@ export const useOrder = (slug) => {
     loadOrder()
   }, [orderId])
 
+  // Inicializa itemsDetail quando campaign e opcoes são carregados
+  // Cada item começa com qty=0 e price resolvido (próprio ou padrão da campanha)
+  useEffect(() => {
+    if (!campaign || opcoes.length === 0) {
+      setItemsDetail([])
+      return
+    }
+    const precoCampanha = Number.isFinite(Number(campaign.price)) ? Number(campaign.price) : 0
+    setItemsDetail(
+      opcoes.map((o) => ({
+        name: o.label,
+        price:
+          o.price != null && Number.isFinite(Number(o.price))
+            ? Number(o.price)
+            : precoCampanha,
+        qty: 0,
+      }))
+    )
+  }, [campaign, opcoes])
+
+  // Incrementa ou decrementa a quantidade de uma variante (qty nunca fica negativo)
+  const alterarQtdVariante = useCallback((name, delta) => {
+    setItemsDetail((prev) =>
+      prev.map((item) =>
+        item.name === name ? { ...item, qty: Math.max(0, item.qty + delta) } : item
+      )
+    )
+  }, [])
+
   const handleFormChange = useCallback((e) => {
     const name = e.target.name
     const value = e.target.type === 'number' ? Number(e.target.value) : e.target.value
@@ -294,6 +379,7 @@ export const useOrder = (slug) => {
     setOrder(null)
     setProofSent(false)
     setShowPix(false)
+    setItemsDetail([])
   }, [])
 
   const revealPix = useCallback(() => {
@@ -351,5 +437,7 @@ export const useOrder = (slug) => {
     opcoes,
     opcaoSelecionada,
     setOpcaoSelecionada,
+    itemsDetail,
+    alterarQtdVariante,
   }
 }

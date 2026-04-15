@@ -11,7 +11,7 @@ export const getCampaignBySlug = async (slug) => {
   try {
     const { data, error } = await supabase
       .from('campaigns')
-      .select('id, name, slug, price, item_description, pix_key, delivery_at, contact_whatsapp')
+      .select('id, name, slug, price, item_description, pix_key, delivery_at, contact_whatsapp, has_variants')
       .eq('slug', slug)
       .single()
 
@@ -158,6 +158,7 @@ export async function criarCampanha(dados) {
         contact_whatsapp: dados.whatsapp || null,
         slug,
         user_id: userId,
+        has_variants: dados.hasVariantes ?? false,
       })
 
     if (erroInsert) {
