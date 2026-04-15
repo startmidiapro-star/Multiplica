@@ -7,6 +7,8 @@ import Cadastro from '../pages/Cadastro.jsx'
 import Login from '../pages/Login.jsx'
 import Dashboard from '../pages/Dashboard.jsx'
 import RotaProtegida from '../components/RotaProtegida.jsx'
+import TermsPage from '../pages/legal/TermsPage.jsx'
+import PrivacyPage from '../pages/legal/PrivacyPage.jsx'
 
 const router = createBrowserRouter([
   { path: '/',             element: <Home /> },
@@ -24,7 +26,10 @@ const router = createBrowserRouter([
   },
   { path: '/c/:slug',      element: <OrderPage /> },
   { path: '/admin/:slug',  element: <AdminPage /> },
+  { path: '/legal/terms',  element: <TermsPage /> },
+  { path: '/legal/privacy',element: <PrivacyPage /> },
 ])
 
-export const AppRouter = () => <RouterProvider router={router} />
-export default router
+export default function AppRouter() {
+  return <RouterProvider router={router} />
+}
