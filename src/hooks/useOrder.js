@@ -139,8 +139,10 @@ export const useOrder = (slug) => {
       const precoCampanha = Number(campaign.price)
       const precoPadrao = Number.isFinite(precoCampanha) ? precoCampanha : 0
 
-      const opcaoEscolhida = opcaoSelecionada
-        ? opcoes.find((o) => o.label === opcaoSelecionada)
+      // Busca o objeto da opção pelo label com trim — evita mismatch por espaço acidental
+      const labelNormalizado = opcaoSelecionada.trim()
+      const opcaoEscolhida = labelNormalizado
+        ? opcoes.find((o) => o.label.trim() === labelNormalizado)
         : null
       const precoOpcaoRaw = opcaoEscolhida?.price != null ? Number(opcaoEscolhida.price) : null
       const precoUnidade =
@@ -167,8 +169,20 @@ export const useOrder = (slug) => {
         quantity,
         total_price: totalPrice,
         // Inclui a opção escolhida — null quando a campanha não tem variações
-        selected_option: opcaoSelecionada || null,
+        selected_option: labelNormalizado || null,
       }
+
+      // Debug — visível no console do navegador durante testes
+      console.log('[useOrder] generatePix — pré-insert:', {
+        opcaoSelecionada: labelNormalizado,
+        opcaoEscolhida,
+        precoPadrao,
+        precoUnidade,
+        quantity,
+        totalPrice,
+        orderData,
+      })
+
       const order = await createOrder(orderData)
       if (order?.id) {
         setOrderId(order.id)
