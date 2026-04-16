@@ -11,12 +11,18 @@ Antes de responder qualquer pergunta ou escrever qualquer código, leia os arqui
 
 ```
 1. src/lib/supabase.js
-2. src/services/campaignService.js
-3. src/services/adminService.js
-4. src/hooks/useOrder.js
-5. src/pages/OrderPage.jsx
-6. src/pages/AdminPage.jsx
+2. src/services/authService.js
+3. src/services/campaignService.js
+4. src/services/adminService.js
+5. src/services/dashboardService.js
+6. src/hooks/useOrder.js
 7. src/pages/Home.jsx
+8. src/pages/Login.jsx
+9. src/pages/Cadastro.jsx
+10. src/pages/Dashboard.jsx
+11. src/pages/CreateCampaign.jsx
+12. src/pages/OrderPage.jsx
+13. src/pages/AdminPage.jsx
 ```
 
 Após a leitura, confirme com:
@@ -35,522 +41,260 @@ Só prossiga após confirmar as três respostas.
 
 ## 🎯 Contexto do Projeto
 
-O **MULTIPLICA** é uma plataforma de gestão de pedidos coletivos em comunidades.
+O **MULTIPLICA** é uma plataforma de gestão de pedidos coletivos em comunidades brasileiras.
 Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações, vaquinhas).
 
-| Perfil                       | O que precisa                                                 |
-| ---------------------------- | ------------------------------------------------------------- |
-| **Organizador** — Dona Neide | Criar campanha, validar comprovantes, cobrar pendentes        |
-| **Comprador** — Seu João     | Fazer pedido, pagar via Pix, enviar comprovante com segurança |
+| Perfil                       | Acesso                                | O que precisa                                  |
+| ---------------------------- | ------------------------------------- | ---------------------------------------------- |
+| **Organizador** — Dona Neide | Login email + senha → Dashboard       | Criar campanhas, validar pedidos, ver produção |
+| **Comprador** — Seu João     | Zero-Auth via link público `/c/:slug` | Fazer pedido, escolher sabores, pagar via Pix  |
 
-**Estamos no MVP.** Velocidade, simplicidade e foco no essencial.
-Não sugira o que não foi pedido. Não adicione complexidade desnecessária.
+**Versão atual: V1.0 — funcionalmente completa. Próxima etapa: testes com usuários reais + deploy.**
 
 ---
 
 ## 🛠️ Stack Tecnológica
 
-| Camada         | Tecnologia                          | Observação                               |
-| -------------- | ----------------------------------- | ---------------------------------------- |
-| Frontend       | **React + Vite + Tailwind CSS**     | Mobile-first                             |
-| Banco de Dados | **Supabase (PostgreSQL)**           | RLS ativo em todas as tabelas            |
-| Storage        | **Supabase Storage**                | Bucket `comprovantes` — deve ser privado |
-| Automação      | **Make.com** e **n8n**              | Fluxos exportados em `/automations/`     |
-| Scripts        | **JavaScript / Google Apps Script** | Simples, modulares, sem frameworks       |
-| Hospedagem     | **Vercel**                          | Deploy contínuo via Git                  |
-| Mensageria     | **API WhatsApp**                    | Notificações e cobranças amigáveis       |
-
-> Se precisar sugerir tecnologia fora desta lista, **justifique antes de implementar**.
+| Camada         | Tecnologia                      | Observação                             |
+| -------------- | ------------------------------- | -------------------------------------- |
+| Frontend       | **React + Vite + Tailwind CSS** | Mobile-first                           |
+| Banco de Dados | **Supabase (PostgreSQL)**       | RLS ativo em todas as tabelas          |
+| Autenticação   | **Supabase Auth**               | Email + senha para organizador         |
+| Storage        | **Supabase Storage**            | Bucket `comprovantes` — privado        |
+| Fonte          | **Quicksand**                   | Google Fonts — cor principal `#5a8fdb` |
+| Hospedagem     | **Vercel**                      | Deploy pendente                        |
 
 ---
 
-## 🔴 Prioridades Atuais — Trabalhe nesta ordem
+## ✅ Prioridades Concluídas
 
-Não avance para o próximo item sem confirmar que o anterior está resolvido.
+### P1 — Admin fechado
 
-### ✅ Prioridade 1 — CONCLUÍDA: Fechar o painel admin
+- RLS em `orders` restrito por `manager_token` via header `x-manager-token`
+- Token via fragmento `#auth=UUID` — nunca em query string
+- Token salvo em `sessionStorage` antes de limpar hash
 
-_(Concluída em 2026-03-31)_
+### P2 — Storage privado
 
-- `manager_token UUID` garantido na tabela `campaigns`
-- RLS em `orders`: SELECT restrito por token ou order_id; UPDATE restrito ao admin com token válido
-- `supabase.js`: token lido de `window.location.hash`, injetado via `x-manager-token`
-- Token persistido em `sessionStorage` para requests após limpeza do hash
-- `AdminPage.jsx`: lê hash, limpa com `history.replaceState`, bloqueia acesso sem token
-- SQL: `sql/rls_orders.sql`
+- Bucket `comprovantes` privado
+- `proof_url` salva path relativo no banco
+- URLs assinadas com expiração de 1 hora
 
----
-
-### ✅ Prioridade 2 — CONCLUÍDA: Storage de comprovantes privado
-
-_(Concluída em 2026-03-31)_
-
-- Bucket `comprovantes` alterado para `public = false`
-- `proof_url` no banco salva path relativo — nunca URL pública
-- `adminService.js`: `gerarUrlAssinadaComprovante(path)` com expiração de 1 hora
-- `AdminPage.jsx`: URL assinada gerada ao abrir o modal, nunca antes
-- `supabase.js`: `x-order-id` injetado via localStorage para RLS do comprador
-- SQL: `sql/storage_privado.sql`
-
----
-
-### ✅ Prioridade 3 — CONCLUÍDA: Token via fragmento de URL
-
-_(Concluída junto com P1 em 2026-03-31)_
+### P3 — Token no fragmento de URL
 
 - Link Mágico usa `/admin/:slug#auth=UUID`
-- Token lido via `window.location.hash` — nunca da query string
-- Fragmento limpo com `history.replaceState` após captura
+- Hash limpo após captura via `history.replaceState`
 
----
+### P4 — UX do comprador
 
-### ✅ Prioridade 4 — CONCLUÍDA: Refinamento de UX do comprador
+- Botão "Enviando..." durante upload
+- Tela de confirmação pós-upload com resumo
+- Link WhatsApp pós-upload
+- Polling de 5s para atualização de status
+- Feedback de erro some após 3s
 
-- proof_url salvo como path relativo ✅
-- Botão "Enviando..." desabilitado durante upload ✅
-- Múltiplos envios impedidos ✅
-- Tela de confirmação pós-upload ✅
-- Link WhatsApp pós-upload ✅
-- Feedback de sucesso/erro some após 3s ✅
-- Botão "Ver Pix novamente" condicional ✅
-- Revisão visual completa — compatível com modo escuro/claro ✅
+### P5 — Validação de comprovante no admin
 
-### ✅ Prioridade 5 — CONCLUÍDA: Validação de comprovante no admin
+- Aprovação bloqueada sem comprovante
+- Confirmação antes de aprovar e rejeitar
+- Data nula exibe "Entrega: não definida"
 
-- Aprovação bloqueada sem comprovante ✅
-- Confirmação antes de aprovar (com nome e valor) ✅
-- Confirmação antes de rejeitar ✅
-- Badge redundante removido ✅
-- Data nula exibe "Entrega: não definida" ✅
-- WhatsApp vazio tratado corretamente ✅
+### P6 — Dashboard de criação de campanha
 
-markdown### ✅ Prioridade 6 — CONCLUÍDA: Dashboard de criação de campanha
+- Rota `/nova-campanha` → `CreateCampaign.jsx`
+- `slug` gerado automaticamente com sufixo aleatório
+- `manager_token` gerado pelo banco via `gen_random_uuid()`
 
-- Rota `/nova-campanha` → `CreateCampaign.jsx` ✅
-- Home atualizada com dois botões ✅
-- Formulário com campos obrigatórios e opcionais ✅
-- slug gerado automaticamente com sufixo aleatório ✅
-- manager_token gerado pelo banco — nunca pelo frontend ✅
-- Tela de confirmação com links e aviso de guardar ✅
-- RLS em `campaigns` — INSERT aberto, SELECT restrito via `x-campaign-id` ✅
+### P7 — Home + Contador + Compartilhar
 
----
-
-### ✅ Prioridade 7 — CONCLUÍDA: Home + Contador + Compartilhar
-
-**Arquivos envolvidos:** `Home.jsx`, `App.css`, `AdminPage.jsx`
-
-### ✅ P7.1 — CONCLUÍDA: Identidade Visual da Home
-
-**Arquivo:** `src/pages/Home.jsx` e CSS correspondente. Não altere mais nada.
-
-**O que já está feito — não toque:**
-
+- Home redesenhada: Quicksand, `#5a8fdb`, árvore SVG ao fundo
 - Headline: "Gerencie vendas e arrecadações da sua comunidade com simplicidade."
-- Subheadline: "Pedidos, comprovantes e confirmações em um só lugar."
-- Estrutura JSX completa — não alterar
-- Assinatura "Juntos fazemos mais." em #5a8fdb, itálico, font-weight 700
-- Cards em 3 colunas desktop / 1 coluna mobile
+- Botões: "Começar Minha Campanha Grátis" → `/cadastro` | "Acessar Minha Campanha" → `/login`
+- Contador operacional no admin (total, aprovados, pendentes, rejeitados, itens, valores)
+- Botão "Compartilhar no WhatsApp" com mensagem pré-preenchida
+- `window.supabase` global removido
 
-**O que ainda falta implementar:**
+### P8 — Autenticação do Organizador
 
-**Fonte:** importar Quicksand do Google Fonts. Aplicar no título com font-weight 700.
+- Supabase Auth — email + senha
+- `Cadastro.jsx`, `Login.jsx`, `Dashboard.jsx` criados e funcionando
+- `RotaProtegida.jsx` — guarda de rota
+- `authService.js`, `dashboardService.js` implementados
+- Campanhas vinculadas ao `user_id = auth.uid()`
+- RLS blindado para `authenticated`
+- `getCampaignBySlug` usa colunas explícitas — `manager_token` nunca exposto ao comprador
 
-**Título:** "multi" em #1a1a2e claro no dark mode (usar branco ou #f0f0f0). "plica" em #5a8fdb itálico. Ponto do "i" em #5a8fdb levemente maior via ::after.
+### P9 — Variantes e Carrinho
 
-**Botões — textos atualizados:**
-
-- Primário: "Começar Minha Campanha Grátis"
-- Secundário: "Acessar Minha Campanha"
-- Ambos com :active além de hover — para funcionar no touch mobile
-- Mobile: largura 100%, altura mínima 48px, gap 12px entre eles
-
-**Dark mode — "multi" invisível:**
-Adicionar variável CSS para cor do texto escuro do título mudar para branco no dark mode.
-
-**Ponto pulsante acima do título:**
-Remover o ponto pulsante separado — o símbolo será reimplementado depois como rede de pontos conectados.
-
-**Cards — simplificar:**
-Apenas ícone + uma palavra: "Pedidos", "Pagamentos", "Organização". Remover textos descritivos dos cards.
-
-**Restrições:** não alterar lógica, rotas, outros componentes ou a árvore de fundo.
-
-**7.2 Contador operacional no topo do admin**
-
-Bloco de resumo abaixo do header da campanha em `AdminPage.jsx`.
-Calculado a partir do array `orders` já carregado — sem requisição extra.
-Visual em cards ou badges — não texto corrido.
-
-Exibir:
-
-- Pedidos recebidos (total)
-- Aprovados
-- Pendentes de análise
-- Rejeitados
-- Total de itens a produzir (soma de `quantity` dos `approved`)
-- Valor confirmado (soma de `total_price` dos `approved`)
-- Valor pendente (soma de `total_price` dos `pending_payment`)
-
-Exemplo de layout:
-┌─────────────┬─────────────┬─────────────┬─────────────┐
-│ Total: 12 │ Aprovados:8 │ Pendentes:3 │Rejeitados:1 │
-└─────────────┴─────────────┴─────────────┴─────────────┘
-Itens a produzir: 46
-Confirmados: R$ 460,00 | Pendentes: R$ 120,00
-
-**7.3 Botão compartilhar campanha no WhatsApp**
-
-Mesmo bloco do contador. Botão "Compartilhar no WhatsApp" abre
-`https://wa.me/?text={mensagem codificada}` com texto pré-preenchido:
-
-📣 Nossa campanha já está a todo vapor!
-Já temos [X] itens aprovados 🙌
-Se você ainda não fez seu pedido, ainda dá tempo:
-[LINK DA CAMPANHA /c/:slug]
-🕒 Entrega: [data de entrega — omitir linha se delivery_at for nulo]
-Compartilhe com quem puder 💛
-
-[X] = soma de `quantity` dos pedidos `approved`.
-
-**7.4 Remover `window.supabase` global**
-
-Em `src/lib/supabase.js`, remover exposição global antes do deploy.
-Verificar se algum outro arquivo depende de `window.supabase` antes de remover.
-
-### 🔴 Prioridade 8 — Autenticação do Organizador (Login/Senha)
-
-**Escopo:** Refatoração arquitetural. Mudança no núcleo do produto.
-**Não iniciar sem ler tudo abaixo.**
+- Checkbox "Produto com sabores/variantes" no `CreateCampaign.jsx`
+- Campo `has_variants` (BOOLEAN) e `variants` (JSONB) em `campaigns`
+- Tabela `campaign_options` com `label`, `price`, `sort_order`
+- Campo `items_detail` (JSONB) em `orders`
+- Comprador vê lista de sabores com botões +/- por item
+- Total calculado dinamicamente: `soma(price × qty)`
+- Admin exibe composição: "2× Carne (R$ 10,00), 1× Queijo (R$ 12,00)"
+- Contador de produção por variação no admin
+- Policy `orders_insert_authenticated` adicionada
 
 ---
 
-**Decisão de produto:**
+## 🗄️ Estrutura do Banco de Dados
 
-- Organizadora usa email + senha para criar conta e acessar campanhas
-- Supabase Auth gerencia autenticação — não construir do zero
-- Link Mágico continua funcionando como atalho opcional de acesso rápido
-- Fluxo do comprador permanece Zero-Auth — não alterar
+### Tabela `campaigns`
 
----
+| Coluna             | Tipo      | Observação                                    |
+| ------------------ | --------- | --------------------------------------------- |
+| `id`               | UUID      | PK                                            |
+| `user_id`          | UUID      | FK → auth.users                               |
+| `name`             | TEXT      | Nome da campanha (a causa)                    |
+| `item_description` | TEXT      | O que está sendo vendido                      |
+| `price`            | NUMERIC   | Preço padrão (fallback)                       |
+| `pix_key`          | TEXT      | Chave Pix do organizador                      |
+| `slug`             | TEXT      | URL amigável com sufixo aleatório             |
+| `manager_token`    | UUID      | Acesso via Link Mágico (retrocompatibilidade) |
+| `delivery_at`      | TIMESTAMP | Data de entrega (opcional)                    |
+| `contact_whatsapp` | TEXT      | Contato do organizador                        |
+| `has_variants`     | BOOLEAN   | Se true, usa sistema de variantes             |
+| `variants`         | JSONB     | Array `[{name, price}]`                       |
+| `plan_type`        | TEXT      | 'free' por padrão                             |
+| `is_premium`       | BOOLEAN   | false por padrão                              |
 
-**Páginas novas:**
+### Tabela `campaign_options`
 
-`/cadastro` → `src/pages/Cadastro.jsx`
+| Coluna        | Tipo    | Observação                                                |
+| ------------- | ------- | --------------------------------------------------------- |
+| `id`          | UUID    | PK                                                        |
+| `campaign_id` | UUID    | FK → campaigns                                            |
+| `label`       | TEXT    | Nome da opção                                             |
+| `price`       | NUMERIC | Preço da opção (nullable — fallback para campaigns.price) |
+| `sort_order`  | INTEGER | Ordem de exibição                                         |
 
-- Campos: nome, email, senha, confirmar senha
-- Usar `supabase.auth.signUp()`
-- Após cadastro: redirecionar para `/dashboard`
+### Tabela `orders`
 
-`/login` → `src/pages/Login.jsx`
-
-- Campos: email, senha
-- Link "Esqueci minha senha" → `supabase.auth.resetPasswordForEmail()`
-- Após login: redirecionar para `/dashboard`
-
-`/dashboard` → `src/pages/Dashboard.jsx`
-
-- Lista todas as campanhas do organizador logado
-- Card por campanha: nome, data de entrega, total de pedidos, status
-- Botão "Gerenciar" → abre `/admin/:slug#auth=:token`
-- Botão "Copiar link do comprador"
-- Botão "Nova campanha" → `/nova-campanha`
-- Botão "Sair" → `supabase.auth.signOut()`
-
----
-
-**Páginas alteradas:**
-
-`Home.jsx`
-
-- Botão "Começar Minha Campanha Grátis" → `/cadastro`
-- Botão "Acessar Minha Campanha" → `/login`
-- Remover lógica de localStorage de campanhas
-
-`CreateCampaign.jsx`
-
-- Verificar sessão ativa antes de renderizar
-- Se não logado → redirecionar para `/login`
-- Ao criar campanha: vincular `user_id` = `auth.uid()`
-- Após criação: redirecionar para `/dashboard`
-
-`AdminPage.jsx`
-
-- Manter validação do Link Mágico (`#auth=token`) como atalho
-- Adicionar validação alternativa via sessão Supabase Auth
-- Se nem token nem sessão → redirecionar para `/login`
+| Coluna            | Tipo    | Observação                                      |
+| ----------------- | ------- | ----------------------------------------------- |
+| `id`              | UUID    | PK                                              |
+| `campaign_id`     | UUID    | FK → campaigns                                  |
+| `customer_name`   | TEXT    | **Imutável após criação**                       |
+| `whatsapp`        | TEXT    | **Imutável após criação**                       |
+| `quantity`        | INTEGER | Total de unidades — **imutável**                |
+| `total_price`     | NUMERIC | **Imutável após criação**                       |
+| `selected_option` | TEXT    | Opção única (campanha sem variantes)            |
+| `items_detail`    | JSONB   | `[{name, price, qty}]` (campanha com variantes) |
+| `status`          | TEXT    | pending_payment / approved / rejected           |
+| `proof_url`       | TEXT    | Path relativo do comprovante                    |
 
 ---
 
-**Banco de dados:**
+## 🔒 Estado Atual de Segurança
 
-```sql
--- Vincular campanhas ao user_id do Supabase Auth
-ALTER TABLE campaigns
-  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
-
--- RLS campaigns — SELECT
-DROP POLICY IF EXISTS "Criador pode ler própria campanha" ON campaigns;
-CREATE POLICY "Organizador lê próprias campanhas"
-ON campaigns FOR SELECT
-TO authenticated
-USING (user_id = auth.uid());
-
--- RLS campaigns — UPDATE
-CREATE POLICY "Organizador atualiza próprias campanhas"
-ON campaigns FOR UPDATE
-TO authenticated
-USING (user_id = auth.uid());
-
--- Manter SELECT via x-campaign-id para criação (anon)
--- Manter INSERT aberto para anon
-```
-
-Salvar como `sql/rls_auth.sql` — executar no Supabase após implementação.
+| Item                                      | Estado                                     |
+| ----------------------------------------- | ------------------------------------------ |
+| RLS em `orders` — INSERT anon             | ✅ Aberto para comprador                   |
+| RLS em `orders` — INSERT authenticated    | ✅ Policy adicionada na P9                 |
+| RLS em `orders` — SELECT/UPDATE           | ✅ Restrito por token/order-id/user_id     |
+| RLS em `campaigns` — INSERT               | ✅ Apenas authenticated                    |
+| RLS em `campaigns` — SELECT anon          | ✅ Policy por slug sem expor manager_token |
+| RLS em `campaigns` — SELECT authenticated | ✅ Filtra por user_id via RLS              |
+| RLS em `campaign_options` — SELECT        | ✅ Aberto para anon e authenticated        |
+| RLS em `campaign_options` — INSERT/DELETE | ✅ Apenas organizador dono                 |
+| Bucket `comprovantes`                     | ✅ Privado com URLs assinadas 1h           |
+| Token admin na URL                        | ✅ Fragmento `#auth=UUID`                  |
+| `window.supabase` global                  | ✅ Removido                                |
+| `manager_token` exposto ao comprador      | ✅ Resolvido — colunas explícitas          |
 
 ---
 
-**Serviços novos:**
+## 📋 Commits Relevantes
 
-`src/services/authService.js`
-
-cadastrar(nome, email, senha)
-entrar(email, senha)
-sair()
-recuperarSenha(email)
-obterSessao()
-
-`src/services/dashboardService.js`
-
-listarCampanhasDoOrganizador()
-→ SELECT \* FROM campaigns WHERE user_id = auth.uid()
-
----
-
-**Proteção de rotas:**
-
-Criar `src/components/RotaProtegida.jsx`
-
-- Verifica sessão ativa via `supabase.auth.getSession()`
-- Se não logado → redirecionar para `/login`
-- Usar em: `/nova-campanha`, `/dashboard`
-
----
-
-**Regras críticas:**
-
-- Nunca armazenar senha em texto puro — Supabase Auth cuida disso
-- `manager_token` continua existindo — Link Mágico segue funcionando
-- Fluxo do comprador (`/c/:slug`) não recebe nenhuma alteração
-- Campanhas criadas antes da P8 (sem `user_id`) continuam acessíveis via Link Mágico
-- Comentários em português, variáveis em camelCase português
-
----
-
-**Ordem de execução:**
-
-1. `authService.js` e `dashboardService.js`
-2. `Cadastro.jsx` e `Login.jsx`
-3. `Dashboard.jsx`
-4. `RotaProtegida.jsx`
-5. Atualizar `Home.jsx`
-6. Atualizar `CreateCampaign.jsx`
-7. Atualizar `AdminPage.jsx`
-8. Executar `sql/rls_auth.sql` no Supabase
-9. Testar fluxo completo — cadastro → login → criar campanha → dashboard → admin
-
-## 🔒 Estado Atual de Segurança (Referência)
-
-| Item                        | Estado      | Observação                                   |
-| --------------------------- | ----------- | -------------------------------------------- |
-| RLS em `orders` — INSERT    | ✅ OK       | Aberto para anon com rate limiting           |
-| RLS em `orders` — SELECT    | ✅ OK       | Admin via token; comprador via order_id      |
-| RLS em `orders` — UPDATE    | ✅ OK       | Restrito ao portador do `manager_token`      |
-| RLS em `campaigns` — INSERT | ✅ OK       | Aberto para anon                             |
-| RLS em `campaigns` — SELECT | ✅ OK       | Restrito via `x-campaign-id`                 |
-| Bucket `comprovantes`       | ✅ OK       | Privado — URLs assinadas com expiração de 1h |
-| Token do admin na URL       | ✅ OK       | Fragmento `#auth=UUID`, limpo após captura   |
-| Imutabilidade de pedidos    | ✅ OK       | Trigger ativo no banco                       |
-| `window.supabase` global    | ⚠️ Pendente | Remover antes do deploy — P7 item 4          |
-
----
-
-## ✅ O Que Já Foi Resolvido — Não Toque
-
-| Problema resolvido            | Solução aplicada                                                   |
-| ----------------------------- | ------------------------------------------------------------------ |
-| RLS bloqueando INSERT/SELECT  | Policies específicas para anon                                     |
-| Status não atualizava na tela | Polling a cada 5s + mapeamento de `pending_payment`                |
-| Dados sumiam após reload      | `getOrderById` + estado `order` + localStorage                     |
-| Upload com dois passos        | Botão único com label + input hidden                               |
-| Modal abrindo nova aba        | Modal com overlay e imagem responsiva                              |
-| Polling parando               | Ajuste no array de dependências do useEffect                       |
-| Export duplicado              | Remoção do export duplo em `AdminPage.jsx`                         |
-| Painel admin público          | RLS com `manager_token` + token via `x-manager-token` header       |
-| Token exposto na query string | Fragmento `#auth=UUID` + `history.replaceState` + `sessionStorage` |
-| Comprovantes com URL pública  | Bucket privado + path relativo no banco + URL assinada 1h          |
+| Hash      | O que contém                                                 |
+| --------- | ------------------------------------------------------------ |
+| `7e331ff` | Estado inicial antes das implementações de segurança         |
+| `a89280f` | P1 e P3 — token, RLS, hash                                   |
+| `017e8c3` | P2 — storage privado                                         |
+| `1617a88` | P6 — dashboard de criação de campanha                        |
+| `e0c7704` | P7.3 e P7.4 — compartilhar WhatsApp e remove window.supabase |
+| `7580cc3` | P7.1 — fonte Quicksand e identidade visual                   |
+| `823a5ce` | P8 — dashboard filtra por user_id via RLS                    |
+| `24b1f86` | P8 — botão Acessar redireciona para /login                   |
+| `ade8507` | P9 — exibe opção nos pedidos e breakdown no contador         |
+| `e15fb68` | P9 — fix INSERT authenticated em orders                      |
+| `f547ee7` | P9 — checkbox variantes no CreateCampaign                    |
+| `fb61854` | P9 — modo variantes com +/- por sabor na OrderPage           |
+| `1c74c4b` | P9 — exibe items_detail formatado no admin                   |
 
 ---
 
 ## 🏛️ Decisões de Arquitetura — Não Questione
 
-Estas decisões foram tomadas conscientemente. Não sugira alternativas sem ser solicitado.
-
-| Decisão                                         | Motivo                                                                   |
-| ----------------------------------------------- | ------------------------------------------------------------------------ |
-| **localStorage** para persistência do comprador | Escolha de UX — usuário sem conta quer ver pedido ao reabrir o navegador |
-| **Polling de 5s** em vez de Realtime            | Aceitável para MVP. ~10 req/s com 50 usuários. Realtime é roadmap futuro |
-| **Zero-Auth** para o comprador                  | Pilar do produto. Nunca sugira login/senha para o comprador              |
-| **Token UUID** para o organizador               | Solução enxuta para MVP, reforçada com header + fragmento de URL         |
-
----
-
-## 📝 Regras de Desenvolvimento
-
-### Idioma
-
-- Comentários → **Português**
-- Variáveis e funções → **Português** (camelCase)
-- Commits → **Português**
-
-```js
-// ✅ Correto
-const totalDoPedido = calcularTotal(itensSelecionados);
-async function enviarComprovante(idPedido, arquivoComprovante) {}
-
-// ❌ Evitar
-const ttl = calc(itns);
-async function envComp(id, arq) {}
-```
-
-### Segurança — inegociável
-
-Nunca escreva chaves, tokens ou senhas no código.
-
-```js
-// ✅ Correto
-const supabaseUrl = process.env.SUPABASE_URL;
-
-// ❌ NUNCA
-const supabaseUrl = "https://xyzcompany.supabase.co";
-```
-
-### Cabeçalho em todo arquivo novo
-
-```js
-/**
- * MULTIPLICA — [Nome do Módulo]
- * Responsabilidade: [O que este arquivo faz]
- * Dependências: [Variáveis de ambiente ou módulos externos]
- */
-```
-
-### Simplicidade
-
-- Sem frameworks fora da stack listada
-- Funções pequenas com uma responsabilidade
-- Sem dependências novas sem justificativa
+| Decisão                              | Motivo                                                 |
+| ------------------------------------ | ------------------------------------------------------ |
+| **Login/senha** para organizador     | Público recorrente — precisa de dashboard seguro       |
+| **Zero-Auth** para comprador         | Público eventual — sem atrito, sem cadastro            |
+| **Link Mágico** mantido como atalho  | Retrocompatibilidade                                   |
+| **Polling de 5s** em vez de Realtime | Aceitável para MVP                                     |
+| **localStorage** para comprador      | Escolha de UX consciente                               |
+| **Pedidos imutáveis** após criação   | `quantity`, `total_price`, `customer_name` nunca mudam |
+| **Supabase Auth nativo**             | Sem construir autenticação do zero                     |
+| **Fallback de preço**                | Se opção sem preço → usa `price` da campanha           |
 
 ---
 
-## 🔄 Fluxos de Negócio
+## 🗺️ Roadmap V2.0 — Pós-MVP
 
-### Fluxo do Comprador
+### Fase 1 — Pix Automático
 
-```
-Acessar link público → Selecionar itens → Ver chave Pix e valor total
-→ Pagar externamente → Enviar print do comprovante
-→ Receber confirmação + link de acompanhamento via WhatsApp
-```
+Integração via Webhook com PSP (Efí, Mercado Pago ou OpenPix).
+Pedido confirmado em < 2 segundos. Fim da conferência manual de comprovantes.
 
-### Fluxo do Organizador
+### Fase 2 — Modo Cozinha (KDS)
 
-```
-Criar campanha → Receber Link Mágico (manager_token via fragmento #)
-→ Compartilhar link público → Receber notificação de novo comprovante
-→ Validar no painel Semáforo → Confirmar ou rejeitar pedido
-→ Disparar cobrança amigável para pendentes
-```
+Nova interface `KitchenView.jsx` com agregação de `items_detail`.
+Visão consolidada: "Fritar 15× Carne | 10× Queijo".
+Base técnica já existe com `items_detail`.
 
-### Regras críticas de negócio
+### Fase 3 — Logística de Entrega
 
-- Pedidos são **imutáveis** após criação — `quantity`, `item_price`, `customer_name` nunca mudam
-- `manager_token` **nunca** aparece em query string — sempre header `x-manager-token`
-- INSERT de pedidos é público, mas com rate limiting por IP
-- Comprovantes são **sempre privados** — nunca URL pública, sempre URL assinada com expiração
+Botão "Marcar como entregue" no admin.
+QR Code único por pedido como evolução futura (V3).
 
 ---
 
-## 📁 Estrutura de Pastas
+## 🚀 Próximos Passos Imediatos
 
-```
-multiplica/
-├── src/
-│   ├── components/             → Componentes reutilizáveis
-│   ├── pages/
-│   │   ├── Home.jsx
-│   │   ├── OrderPage.jsx       → Fluxo do comprador
-│   │   └── AdminPage.jsx       → Painel do organizador
-│   ├── hooks/
-│   │   └── useOrder.js         → Hook principal do fluxo do comprador
-│   ├── services/
-│   │   ├── campaignService.js  → Serviço de campanhas
-│   │   └── adminService.js     → Serviço do painel
-│   ├── lib/
-│   │   └── supabase.js         → Configuração do cliente Supabase
-│   ├── utils/
-│   ├── routes/
-│   ├── App.jsx
-│   └── main.jsx
-├── sql/                        → Schema, RLS, triggers, funções
-├── automations/                → Fluxos Make e n8n em JSON
-├── docs/                       → Regras de negócio, fluxos, LGPD
-├── .env.example                → Variáveis necessárias (sem valores reais)
-├── README.md                   → Visão geral do projeto
-└── CLAUDE.md                   → Este arquivo
-```
+| Ordem | O que fazer                                                                        |
+| ----- | ---------------------------------------------------------------------------------- |
+| 1     | Teste com usuário real — Dona Neide cria campanha, compradores reais fazem pedidos |
+| 2     | Deploy na Vercel                                                                   |
+| 3     | Monitorar erros em produção antes de V2.0                                          |
 
 ---
 
-## 📋 Comandos Frequentes
+## ✅ O Que Já Foi Resolvido — Não Toque
 
-```bash
-# Iniciar o projeto localmente
-npm run dev
-
-# Rodar um script utilitário
-node scripts/nome_do_arquivo.js
-
-# Status do repositório
-git status
-
-# Commit com prefixo correto
-git commit -m "security: implementa validação do token no RLS"
-git commit -m "fix: corrige polling de status no OrderPage"
-git commit -m "feat: adiciona estado enviando no upload de comprovante"
-```
-
-### Prefixos de commit
-
-| Prefixo     | Quando usar                      |
-| ----------- | -------------------------------- |
-| `feat:`     | Nova funcionalidade              |
-| `fix:`      | Correção de bug                  |
-| `security:` | Segurança ou LGPD                |
-| `refactor:` | Melhoria sem mudar comportamento |
-| `docs:`     | Apenas documentação              |
+| Problema resolvido             | Solução aplicada                               |
+| ------------------------------ | ---------------------------------------------- |
+| RLS bloqueando INSERT/SELECT   | Policies específicas para anon e authenticated |
+| Status não atualizava na tela  | Polling a cada 5s                              |
+| Dados sumiam após reload       | `getOrderById` + localStorage                  |
+| Upload com dois passos         | Botão único com label + input hidden           |
+| Modal abrindo nova aba         | Modal com overlay e imagem responsiva          |
+| Painel admin público           | RLS com `manager_token` + header               |
+| Token exposto na query string  | Fragmento `#auth=UUID` + sessionStorage        |
+| Comprovantes com URL pública   | Bucket privado + URL assinada 1h               |
+| Comprador só escolhia um sabor | Carrinho com +/- por variante                  |
+| INSERT authenticated bloqueado | Policy `orders_insert_authenticated`           |
 
 ---
 
 ## ⛔ O Que Você Nunca Deve Fazer
 
-- ❌ Sugerir login/senha para o comprador
-- ❌ Expor `manager_token` em query string ou log
-- ❌ Alterar `quantity`, `item_price` ou `customer_name` de um pedido existente
+- ❌ Alterar `quantity`, `total_price` ou `customer_name` de pedido existente
+- ❌ Expor `manager_token` em query string ou resposta ao comprador
 - ❌ Deixar comprovantes acessíveis por URL pública
 - ❌ Adicionar dependência nova sem justificar
 - ❌ Reescrever algo que já funciona sem motivo explícito
-- ❌ Avançar para a próxima prioridade sem confirmar que a atual está resolvida
+- ❌ Avançar para próxima prioridade sem confirmar que a atual está resolvida
 - ❌ Escrever valores reais de API keys ou tokens no código
 
 ---
@@ -558,7 +302,7 @@ git commit -m "feat: adiciona estado enviando no upload de comprovante"
 ## ✅ Checklist Antes de Entregar Qualquer Código
 
 - [ ] Código comentado em português?
-- [ ] Nomes de variáveis e funções descritivos?
+- [ ] Nomes de variáveis e funções descritivos em português?
 - [ ] Nenhuma chave ou token hardcoded?
 - [ ] Solução mais simples possível para o problema?
 - [ ] Dados sensíveis do comprador protegidos?
@@ -568,3 +312,4 @@ git commit -m "feat: adiciona estado enviando no upload de comprovante"
 ---
 
 _MULTIPLICA — Juntos fazemos mais._
+_Última atualização: 14 de abril de 2026_

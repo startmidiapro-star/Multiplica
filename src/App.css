@@ -398,6 +398,92 @@
   opacity: 0.9;
 }
 
+/* ===== Adições: Footer, nota legal e checkbox de termos =====
+   - usa cor principal #5a8fdb
+   - usa Quicksand quando disponível
+   - funciona em Light e Dark mode
+*/
+
+/* Footer discreto e centralizado */
+.site-footer {
+  font-family: 'Quicksand', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: var(--muted, #6b6b7a);
+  border-top: 1px solid rgba(90, 143, 219, 0.08);
+  background: transparent;
+}
+
+.site-footer .footer-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.site-footer .footer-links a {
+  color: #5a8fdb;
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+
+.site-footer .footer-links a:hover {
+  border-bottom-color: #5a8fdb;
+}
+
+.footer-copy {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted, #8a8f9a);
+}
+
+/* Nota legal abaixo do botão Gerar Pix */
+.order-legal-note {
+  font-size: 0.8125rem; /* small */
+  color: var(--muted, #7a7a82);
+  margin-top: 6px;
+  line-height: 1.2;
+}
+
+/* Checkbox de aceite no formulário de criação */
+.create-termos-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 0.95rem;
+  color: var(--text, #222);
+}
+
+.create-termos-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #5a8fdb;
+  border-radius: 4px;
+}
+
+.create-termos-checkbox a {
+  color: #5a8fdb;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .site-footer {
+    color: #bfc9e6;
+    border-top-color: rgba(90, 143, 219, 0.18);
+  }
+  .footer-copy { color: #9fa8d6; }
+  .order-legal-note { color: #b8c0d9; }
+  .create-termos-checkbox { color: #e6e9f8; }
+  .create-termos-checkbox a { color: #9fc1ff; }
+}
+
 .upload-button--enviando {
   opacity: 0.65;
   cursor: not-allowed;

@@ -221,6 +221,10 @@ const OrderPage = () => {
                   {loading ? 'Gerando...' : 'Gerar Pix'}
                 </button>
 
+                <p className="order-legal-note">
+                  Ao continuar, você concorda com nossos <a href="/legal/terms">Termos</a> e <a href="/legal/privacy">Política de Privacidade</a>.
+                </p>
+
                 {hasValidOrderId && showPix && !proofSent && (
                   <label
                     className={`btn btn-submit btn-upload ${loading ? 'btn-disabled' : ''}`}

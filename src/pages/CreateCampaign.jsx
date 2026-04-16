@@ -30,6 +30,7 @@ export default function CreateCampaign() {
   const [temVariantes, setTemVariantes] = useState(false)
   const [variantes, setVariantes] = useState([])
   const [novaVariante, setNovaVariante] = useState({ name: '', price: '' })
+  const [aceitoTermos, setAceitoTermos] = useState(false)
 
   const linkComprador = campanhaCriada
     ? `${window.location.origin}/c/${campanhaCriada.slug}`
@@ -68,12 +69,17 @@ export default function CreateCampaign() {
       form.itemDescription.trim().length > 0 &&
       Number(form.precoUnitario) > 0 &&
       form.chavePix.trim().length > 0
+      && aceitoTermos
     )
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (!formularioValido()) {
+      if (!aceitoTermos) {
+        setErro('Você deve aceitar os Termos de Responsabilidade do Organizador.')
+        return
+      }
       setErro('Preencha todos os campos obrigatórios.')
       return
     }
@@ -358,6 +364,15 @@ export default function CreateCampaign() {
             </div>
           )}
 
+
+          <label className="create-termos-checkbox">
+            <input
+              type="checkbox"
+              checked={aceitoTermos}
+              onChange={(e) => setAceitoTermos(e.target.checked)}
+            />
+            Li e concordo com os <a href="/legal/terms">Termos de Responsabilidade do Organizador</a>.
+          </label>
           {erro && <p className="create-erro">{erro}</p>}
 
           <div className="create-acoes">
