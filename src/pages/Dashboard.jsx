@@ -5,7 +5,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { listarCampanhasDoOrganizador } from '../services/dashboardService.js'
+import { listarCampanhasDoOrganizador, excluirCampanha } from '../services/dashboardService.js'
 import { sair } from '../services/authService.js'
 
 export default function Dashboard() {
@@ -15,6 +15,10 @@ export default function Dashboard() {
   const [erro, setErro] = useState(null)
   // slug da campanha cujo link foi copiado — volta a null após 2s
   const [copiado, setCopiado] = useState(null)
+  // ID da campanha em processo de exclusão — controla estado de loading no botão
+  const [excluindo, setExcluindo] = useState(null)
+  // Mensagem de erro da última tentativa de exclusão — some após 3s
+  const [erroExclusao, setErroExclusao] = useState(null)
 
   useEffect(() => {
     listarCampanhasDoOrganizador()
@@ -49,6 +53,26 @@ export default function Dashboard() {
     }
     setCopiado(slug)
     setTimeout(() => setCopiado(null), 2000)
+  }
+
+  async function handleExcluir(campanha) {
+    const confirmado = window.confirm(
+      'Tem certeza que deseja excluir esta campanha? Esta ação não pode ser desfeita.'
+    )
+    if (!confirmado) return
+
+    setExcluindo(campanha.id)
+    setErroExclusao(null)
+    try {
+      await excluirCampanha(campanha.id)
+      // Remove a campanha da lista sem recarregar do banco
+      setCampanhas((prev) => prev.filter((c) => c.id !== campanha.id))
+    } catch (e) {
+      setErroExclusao(e.message)
+      setTimeout(() => setErroExclusao(null), 3000)
+    } finally {
+      setExcluindo(null)
+    }
   }
 
   function abrirAdmin(campanha) {
@@ -105,6 +129,10 @@ export default function Dashboard() {
         </div>
       )}
 
+      {erroExclusao && (
+        <p className="dashboard-erro-exclusao">{erroExclusao}</p>
+      )}
+
       <div className="dashboard-lista">
         {campanhas.map((campanha) => {
           // Campanha encerrada: data de entrega definida e já passou
@@ -155,6 +183,14 @@ export default function Dashboard() {
                   onClick={() => copiarLinkComprador(campanha.slug)}
                 >
                   {copiado === campanha.slug ? 'Copiado!' : 'Copiar link'}
+                </button>
+                <button
+                  className="btn-excluir"
+                  onClick={() => handleExcluir(campanha)}
+                  disabled={excluindo === campanha.id}
+                  aria-label={`Excluir campanha ${campanha.name}`}
+                >
+                  {excluindo === campanha.id ? 'Excluindo…' : '🗑'}
                 </button>
               </div>
             </div>

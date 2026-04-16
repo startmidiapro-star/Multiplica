@@ -484,6 +484,15 @@
   .create-termos-checkbox a { color: #9fc1ff; }
 }
 
+/* Layout para páginas legais (mobile-first) */
+.page-legal .legal-container {
+  padding: 20px;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
 .upload-button--enviando {
   opacity: 0.65;
   cursor: not-allowed;
@@ -2052,6 +2061,42 @@
   background: #f3f4f6;
 }
 
+/* Botão de exclusão — ícone lixo, destrutivo mas discreto */
+.btn-excluir {
+  flex: none;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  color: #dc2626;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-excluir:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+.btn-excluir:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  font-size: 12px;
+}
+
+/* Mensagem de erro de exclusão — faixa vermelha abaixo do header */
+.dashboard-erro-exclusao {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 @media (prefers-color-scheme: dark) {
   .dashboard-header h1 { color: #f9fafb; }
   .dashboard-card {
@@ -2074,5 +2119,18 @@
   }
   .btn-copiar-link:hover {
     background: #374151;
+  }
+  .btn-excluir {
+    background: #2a1010;
+    border-color: #7f1d1d;
+    color: #f87171;
+  }
+  .btn-excluir:hover {
+    background: #3b1111;
+    border-color: #ef4444;
+  }
+  .dashboard-erro-exclusao {
+    background: #3b1111;
+    color: #fca5a5;
   }
 }

@@ -1,7 +1,7 @@
 /**
  * MULTIPLICA — Dashboard Service
- * Responsabilidade: Busca campanhas vinculadas ao organizador logado,
- *                   incluindo contagem de pedidos por campanha
+ * Responsabilidade: Busca e gerencia campanhas vinculadas ao organizador logado,
+ *                   incluindo contagem de pedidos e exclusão de campanhas
  * Dependências: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
  */
 import { supabase } from '../lib/supabase.js'
@@ -35,6 +35,38 @@ export async function listarCampanhasDoOrganizador() {
   )
 
   return campanhas.map((campanha, i) => ({ ...campanha, totalPedidos: totais[i] }))
+}
+
+/**
+ * Exclui uma campanha e suas opções vinculadas.
+ * Remove campaign_options primeiro para evitar violação de FK,
+ * depois remove a campanha em si.
+ * A RLS garante que apenas o dono da campanha pode excluí-la.
+ *
+ * @param {string} campanhaId
+ * @throws {Error} Se qualquer etapa da exclusão falhar
+ */
+export async function excluirCampanha(campanhaId) {
+  // Remove as opções da campanha antes de excluir a campanha em si
+  const { error: erroOpcoes } = await supabase
+    .from('campaign_options')
+    .delete()
+    .eq('campaign_id', campanhaId)
+
+  if (erroOpcoes) {
+    console.error('[dashboardService] excluirCampanha - opções:', erroOpcoes.message)
+    throw new Error('Não foi possível excluir as opções da campanha.')
+  }
+
+  const { error } = await supabase
+    .from('campaigns')
+    .delete()
+    .eq('id', campanhaId)
+
+  if (error) {
+    console.error('[dashboardService] excluirCampanha:', error.message)
+    throw new Error('Não foi possível excluir a campanha.')
+  }
 }
 
 /**
