@@ -38,16 +38,29 @@ export async function listarCampanhasDoOrganizador() {
 }
 
 /**
- * Exclui uma campanha e suas opções vinculadas.
- * Remove campaign_options primeiro para evitar violação de FK,
- * depois remove a campanha em si.
- * A RLS garante que apenas o dono da campanha pode excluí-la.
+ * Exclui uma campanha e todos os dados vinculados a ela.
+ * Ordem de deleção respeita as FKs: orders → campaign_options → campaigns.
+ * A RLS garante que apenas o dono da campanha pode executar esta operação.
+ *
+ * Nota LGPD: a limpeza automática de dados após 90 dias do encerramento
+ * deve ser implementada via Supabase Cron Job na V2.0.
  *
  * @param {string} campanhaId
  * @throws {Error} Se qualquer etapa da exclusão falhar
  */
 export async function excluirCampanha(campanhaId) {
-  // Remove as opções da campanha antes de excluir a campanha em si
+  // 1. Remove os pedidos vinculados (dados do comprador — LGPD)
+  const { error: erroPedidos } = await supabase
+    .from('orders')
+    .delete()
+    .eq('campaign_id', campanhaId)
+
+  if (erroPedidos) {
+    console.error('[dashboardService] excluirCampanha - pedidos:', erroPedidos.message)
+    throw new Error('Não foi possível excluir os pedidos da campanha.')
+  }
+
+  // 2. Remove as opções/variantes vinculadas
   const { error: erroOpcoes } = await supabase
     .from('campaign_options')
     .delete()
@@ -58,6 +71,7 @@ export async function excluirCampanha(campanhaId) {
     throw new Error('Não foi possível excluir as opções da campanha.')
   }
 
+  // 3. Remove a campanha em si
   const { error } = await supabase
     .from('campaigns')
     .delete()

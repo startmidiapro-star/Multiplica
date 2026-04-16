@@ -258,6 +258,25 @@ Base técnica já existe com `items_detail`.
 Botão "Marcar como entregue" no admin.
 QR Code único por pedido como evolução futura (V3).
 
+### Fase 4 — Limpeza Automática LGPD (Cron Job)
+
+> ⚠️ **Pendente para V2.0** — implementar via **Supabase Cron Job** (pg_cron).
+>
+> A `PrivacyPage` já informa ao comprador que dados são retidos por 90 dias após o encerramento da campanha.
+> O Cron Job deve excluir, da tabela `orders`, todos os registros cujo `campaign_id` aponte para campanhas
+> com `delivery_at` anterior a 90 dias da data de execução. Comprovantes no bucket `comprovantes` também
+> devem ser removidos via Storage API antes de deletar o registro.
+>
+> SQL de referência:
+> ```sql
+> -- Executar diariamente via pg_cron no Supabase
+> DELETE FROM orders
+> WHERE campaign_id IN (
+>   SELECT id FROM campaigns
+>   WHERE delivery_at < now() - INTERVAL '90 days'
+> );
+> ```
+
 ---
 
 ## 🚀 Próximos Passos Imediatos
