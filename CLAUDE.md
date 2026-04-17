@@ -8,22 +8,33 @@
 ## 🚀 Início de Sessão — Faça isso primeiro
 
 Antes de responder qualquer pergunta ou escrever qualquer código, leia os arquivos abaixo **nesta ordem**:
+src/lib/supabase.js
 
-```
-1. src/lib/supabase.js
-2. src/services/authService.js
-3. src/services/campaignService.js
-4. src/services/adminService.js
-5. src/services/dashboardService.js
-6. src/hooks/useOrder.js
-7. src/pages/Home.jsx
-8. src/pages/Login.jsx
-9. src/pages/Cadastro.jsx
-10. src/pages/Dashboard.jsx
-11. src/pages/CreateCampaign.jsx
-12. src/pages/OrderPage.jsx
-13. src/pages/AdminPage.jsx
-```
+src/services/authService.js
+
+src/services/campaignService.js
+
+src/services/adminService.js
+
+src/services/dashboardService.js
+
+src/hooks/useOrder.js
+
+src/pages/Home.jsx
+
+src/pages/Login.jsx
+
+src/pages/Cadastro.jsx
+
+src/pages/Dashboard.jsx
+
+src/pages/CreateCampaign.jsx
+
+src/pages/OrderPage.jsx
+
+src/pages/AdminPage.jsx
+
+text
 
 Após a leitura, confirme com:
 
@@ -51,13 +62,15 @@ Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações
 
 **Versão atual: V1.0 — funcionalmente completa. Próxima etapa: testes com usuários reais + deploy.**
 
+**🌐 Design Responsivo (RWD):** Todo o projeto é construído com **mobile-first** e Tailwind CSS. Todos os componentes, formulários, listas e modais devem funcionar perfeitamente em qualquer tamanho de tela (celular, tablet, desktop). Use `w-full`, flexbox com `flex-col` no mobile, e garanta botões com tamanho mínimo de toque de 44px.
+
 ---
 
 ## 🛠️ Stack Tecnológica
 
 | Camada         | Tecnologia                      | Observação                             |
 | -------------- | ------------------------------- | -------------------------------------- |
-| Frontend       | **React + Vite + Tailwind CSS** | Mobile-first                           |
+| Frontend       | **React + Vite + Tailwind CSS** | **Mobile-first + Responsivo**          |
 | Banco de Dados | **Supabase (PostgreSQL)**       | RLS ativo em todas as tabelas          |
 | Autenticação   | **Supabase Auth**               | Email + senha para organizador         |
 | Storage        | **Supabase Storage**            | Bucket `comprovantes` — privado        |
@@ -128,7 +141,7 @@ Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações
 
 - Checkbox "Produto com sabores/variantes" no `CreateCampaign.jsx`
 - Campo `has_variants` (BOOLEAN) e `variants` (JSONB) em `campaigns`
-- Tabela `campaign_options` com `label`, `price`, `sort_order`
+- Tabela `campaign_options` com `label`, `price`, `sort_order` (em uso)
 - Campo `items_detail` (JSONB) em `orders`
 - Comprador vê lista de sabores com botões +/- por item
 - Total calculado dinamicamente: `soma(price × qty)`
@@ -142,32 +155,35 @@ Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações
 
 ### Tabela `campaigns`
 
-| Coluna             | Tipo      | Observação                                    |
-| ------------------ | --------- | --------------------------------------------- |
-| `id`               | UUID      | PK                                            |
-| `user_id`          | UUID      | FK → auth.users                               |
-| `name`             | TEXT      | Nome da campanha (a causa)                    |
-| `item_description` | TEXT      | O que está sendo vendido                      |
-| `price`            | NUMERIC   | Preço padrão (fallback)                       |
-| `pix_key`          | TEXT      | Chave Pix do organizador                      |
-| `slug`             | TEXT      | URL amigável com sufixo aleatório             |
-| `manager_token`    | UUID      | Acesso via Link Mágico (retrocompatibilidade) |
-| `delivery_at`      | TIMESTAMP | Data de entrega (opcional)                    |
-| `contact_whatsapp` | TEXT      | Contato do organizador                        |
-| `has_variants`     | BOOLEAN   | Se true, usa sistema de variantes             |
-| `variants`         | JSONB     | Array `[{name, price}]`                       |
-| `plan_type`        | TEXT      | 'free' por padrão                             |
-| `is_premium`       | BOOLEAN   | false por padrão                              |
+| Coluna             | Tipo      | Observação                                      |
+| ------------------ | --------- | ----------------------------------------------- |
+| `id`               | UUID      | PK                                              |
+| `user_id`          | UUID      | FK → auth.users                                 |
+| `name`             | TEXT      | Nome da campanha (a causa)                      |
+| `item_description` | TEXT      | O que está sendo vendido ("Produto/Item")       |
+| `price`            | NUMERIC   | Preço (usado apenas no modo 'single')           |
+| `pix_key`          | TEXT      | Chave Pix do organizador                        |
+| `slug`             | TEXT      | URL amigável com sufixo aleatório               |
+| `manager_token`    | UUID      | Acesso via Link Mágico (retrocompatibilidade)   |
+| `delivery_at`      | TIMESTAMP | Data de entrega (opcional)                      |
+| `contact_whatsapp` | TEXT      | Contato do organizador                          |
+| `has_variants`     | BOOLEAN   | Se true, usa sistema de variantes               |
+| `variants`         | JSONB     | Array `[{name, price}]` — **price obrigatório** |
+| `plan_type`        | TEXT      | 'free' por padrão                               |
+| `is_premium`       | BOOLEAN   | false por padrão                                |
+| `description`      | TEXT      | **V1.1** Objetivo/motivação da campanha         |
+| `recipient_name`   | TEXT      | **V1.1** Nome do titular da chave Pix           |
+| `type`             | TEXT      | **V1.1** 'single' ou 'multiple'                 |
 
 ### Tabela `campaign_options`
 
-| Coluna        | Tipo    | Observação                                                |
-| ------------- | ------- | --------------------------------------------------------- |
-| `id`          | UUID    | PK                                                        |
-| `campaign_id` | UUID    | FK → campaigns                                            |
-| `label`       | TEXT    | Nome da opção                                             |
-| `price`       | NUMERIC | Preço da opção (nullable — fallback para campaigns.price) |
-| `sort_order`  | INTEGER | Ordem de exibição                                         |
+| Coluna        | Tipo    | Observação        |
+| ------------- | ------- | ----------------- |
+| `id`          | UUID    | PK                |
+| `campaign_id` | UUID    | FK → campaigns    |
+| `label`       | TEXT    | Nome da opção     |
+| `price`       | NUMERIC | Preço da opção    |
+| `sort_order`  | INTEGER | Ordem de exibição |
 
 ### Tabela `orders`
 
@@ -222,21 +238,37 @@ Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações
 | `f547ee7` | P9 — checkbox variantes no CreateCampaign                    |
 | `fb61854` | P9 — modo variantes com +/- por sabor na OrderPage           |
 | `1c74c4b` | P9 — exibe items_detail formatado no admin                   |
+| `46b7c39` | V1.0 complete — auth, variantes, páginas legais              |
+| `74c116c` | feat: botão Excluir com confirmação no Dashboard             |
+| `cdf1546` | fix: exclusão bloqueada silenciosamente por RLS              |
+| `b342b72` | feat: botão Copiar Pix e stepper +/- na OrderPage            |
 
 ---
 
 ## 🏛️ Decisões de Arquitetura — Não Questione
 
-| Decisão                              | Motivo                                                 |
-| ------------------------------------ | ------------------------------------------------------ |
-| **Login/senha** para organizador     | Público recorrente — precisa de dashboard seguro       |
-| **Zero-Auth** para comprador         | Público eventual — sem atrito, sem cadastro            |
-| **Link Mágico** mantido como atalho  | Retrocompatibilidade                                   |
-| **Polling de 5s** em vez de Realtime | Aceitável para MVP                                     |
-| **localStorage** para comprador      | Escolha de UX consciente                               |
-| **Pedidos imutáveis** após criação   | `quantity`, `total_price`, `customer_name` nunca mudam |
-| **Supabase Auth nativo**             | Sem construir autenticação do zero                     |
-| **Fallback de preço**                | Se opção sem preço → usa `price` da campanha           |
+| Decisão                              | Motivo                                                        |
+| ------------------------------------ | ------------------------------------------------------------- |
+| **Login/senha** para organizador     | Público recorrente — precisa de dashboard seguro              |
+| **Zero-Auth** para comprador         | Público eventual — sem atrito, sem cadastro                   |
+| **Link Mágico** mantido como atalho  | Retrocompatibilidade                                          |
+| **Polling de 5s** em vez de Realtime | Aceitável para MVP                                            |
+| **localStorage** para comprador      | Escolha de UX consciente                                      |
+| **Pedidos imutáveis** após criação   | `quantity`, `total_price`, `customer_name` nunca mudam        |
+| **Supabase Auth nativo**             | Sem construir autenticação do zero                            |
+| **~~Fallback de preço~~**            | **❌ REMOVIDO na V1.1** — cada variante tem preço obrigatório |
+
+---
+
+## 🚀 Próximos Passos Imediatos
+
+| Ordem | O que fazer                                                |
+| ----- | ---------------------------------------------------------- |
+| 1     | Executar `sql/v1_1_campaigns.sql` no Supabase              |
+| 2     | Implementar V1.1 — CreateCampaign refatorado               |
+| 3     | Testar fluxo completo com campanha simples e com variantes |
+| 4     | Deploy na Vercel                                           |
+| 5     | Teste de campo com usuário real                            |
 
 ---
 
@@ -266,69 +298,133 @@ QR Code único por pedido como evolução futura (V3).
 > O Cron Job deve excluir, da tabela `orders`, todos os registros cujo `campaign_id` aponte para campanhas
 > com `delivery_at` anterior a 90 dias da data de execução. Comprovantes no bucket `comprovantes` também
 > devem ser removidos via Storage API antes de deletar o registro.
->
-> SQL de referência:
-> ```sql
-> -- Executar diariamente via pg_cron no Supabase
-> DELETE FROM orders
-> WHERE campaign_id IN (
->   SELECT id FROM campaigns
->   WHERE delivery_at < now() - INTERVAL '90 days'
-> );
-> ```
 
 ---
 
-## 🚀 Próximos Passos Imediatos
+### 🔄 V1.1 — Refatoração CreateCampaign.jsx
 
-| Ordem | O que fazer                                                                        |
-| ----- | ---------------------------------------------------------------------------------- |
-| 1     | Teste com usuário real — Dona Neide cria campanha, compradores reais fazem pedidos |
-| 2     | Deploy na Vercel                                                                   |
-| 3     | Monitorar erros em produção antes de V2.0                                          |
+**Antes de implementar:** criar `sql/v1_1_campaigns.sql` com:
 
----
+```sql
+-- V1.1 — Migração campaigns
+-- item_description mantido para retrocompatibilidade
+-- O campo "Produto/Item" do formulário V1.1 salva exatamente neste campo
 
-## ✅ O Que Já Foi Resolvido — Não Toque
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS recipient_name TEXT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'single';
+Mostrar SQL antes de executar. Após confirmação, implementar o formulário.
 
-| Problema resolvido             | Solução aplicada                               |
-| ------------------------------ | ---------------------------------------------- |
-| RLS bloqueando INSERT/SELECT   | Policies específicas para anon e authenticated |
-| Status não atualizava na tela  | Polling a cada 5s                              |
-| Dados sumiam após reload       | `getOrderById` + localStorage                  |
-| Upload com dois passos         | Botão único com label + input hidden           |
-| Modal abrindo nova aba         | Modal com overlay e imagem responsiva          |
-| Painel admin público           | RLS com `manager_token` + header               |
-| Token exposto na query string  | Fragmento `#auth=UUID` + sessionStorage        |
-| Comprovantes com URL pública   | Bucket privado + URL assinada 1h               |
-| Comprador só escolhia um sabor | Carrinho com +/- por variante                  |
-| INSERT authenticated bloqueado | Policy `orders_insert_authenticated`           |
+Estrutura do formulário:
 
----
+🌐 Responsivo: todo o formulário deve usar w-full, flexbox com flex-col no mobile, inputs com largura total, botões com tamanho mínimo de toque de 44px.
 
-## ⛔ O Que Você Nunca Deve Fazer
+Seção 1 — Campos básicos:
 
-- ❌ Alterar `quantity`, `total_price` ou `customer_name` de pedido existente
-- ❌ Expor `manager_token` em query string ou resposta ao comprador
-- ❌ Deixar comprovantes acessíveis por URL pública
-- ❌ Adicionar dependência nova sem justificar
-- ❌ Reescrever algo que já funciona sem motivo explícito
-- ❌ Avançar para próxima prioridade sem confirmar que a atual está resolvida
-- ❌ Escrever valores reais de API keys ou tokens no código
+Nome da campanha (obrigatório) — placeholder: "Ex: Pastelada de Outubro ou Rifa do Dia das Crianças" — microcopy: "Use um nome que facilite sua organização."
 
----
+Objetivo/motivação (opcional, textarea) — placeholder: "Ex: Arrecadar fundos para a pintura da fachada da igreja." — microcopy: "Conte brevemente por que as pessoas devem ajudar."
 
-## ✅ Checklist Antes de Entregar Qualquer Código
+Produto/Item (obrigatório) — placeholder: "Ex: Pastel, Rifas, Ingressos ou Marmitas"
 
-- [ ] Código comentado em português?
-- [ ] Nomes de variáveis e funções descritivos em português?
-- [ ] Nenhuma chave ou token hardcoded?
-- [ ] Solução mais simples possível para o problema?
-- [ ] Dados sensíveis do comprador protegidos?
-- [ ] Imutabilidade dos pedidos respeitada?
-- [ ] Arquivo no lugar certo na estrutura do projeto?
+Seção 2 — Tipo de campanha (radio, obrigatório, mutuamente exclusivo):
 
----
+Opção A (padrão): "Vou vender produto de preço único" → exibe campo Preço por unidade (number, step=0.01, obrigatório)
 
-_MULTIPLICA — Juntos fazemos mais._
-_Última atualização: 14 de abril de 2026_
+Opção B: "Produto tem sabores ou preços diferentes" → exibe lista de variantes:
+
+Cada variante: nome (input, obrigatório) + preço (number, step=0.01, obrigatório) + botão "✖" para remover
+
+Botão "+ Adicionar item" abaixo da lista
+
+Mínimo de 1 variante (validação)
+
+⚠️ Campo preço é obrigatório em cada variante — sem fallback, sem herança
+
+Reset de estado: ao alternar entre A e B, limpar completamente os campos da opção anterior
+
+Seção 3 — Pagamento e contato:
+
+Chave Pix (obrigatório) — placeholder: "CPF, e-mail, telefone ou chave aleatória"
+
+Nome do recebedor (obrigatório) — placeholder: "Nome que aparecerá no banco (Ex: Paróquia São Mateus)"
+
+Data de entrega (date, obrigatório)
+
+WhatsApp (obrigatório) — placeholder: "(00) 00000-0000"
+
+Footer:
+
+Checkbox "Li e concordo com os Termos de Responsabilidade do Organizador" (obrigatório)
+
+Botões: "Voltar" e "Criar campanha"
+
+Persistência no Supabase:
+
+Opção A: type = 'single', price = valor, variants = []
+
+Opção B: type = 'multiple', price = null, variants = [{name, price}] — cada price é obrigatório
+
+Salvar também: description, recipient_name, pix_key, delivery_at, contact_whatsapp, user_id
+
+item_description (campo "Produto/Item" do formulário) — mantido como está
+
+O que NÃO fazer:
+
+❌ Não referenciar herança de preço, fallback ou "deixar em branco"
+
+❌ Não permitir variante sem preço no modo múltiplo
+
+❌ Não alterar estilos globais fora do escopo desta tarefa
+
+Commit: refactor: V1.1 - nova estrutura CreateCampaign com tipo, variantes com preço obrigatório e campos de confiança
+
+✅ O Que Já Foi Resolvido — Não Toque
+Problema resolvido	Solução aplicada
+RLS bloqueando INSERT/SELECT	Policies específicas para anon e authenticated
+Status não atualizava na tela	Polling a cada 5s
+Dados sumiam após reload	getOrderById + localStorage
+Upload com dois passos	Botão único com label + input hidden
+Modal abrindo nova aba	Modal com overlay e imagem responsiva
+Painel admin público	RLS com manager_token + header
+Token exposto na query string	Fragmento #auth=UUID + sessionStorage
+Comprovantes com URL pública	Bucket privado + URL assinada 1h
+Comprador só escolhia um sabor	Carrinho com +/- por variante
+INSERT authenticated bloqueado	Policy orders_insert_authenticated
+⛔ O Que Você Nunca Deve Fazer
+❌ Alterar quantity, total_price ou customer_name de pedido existente
+
+❌ Expor manager_token em query string ou resposta ao comprador
+
+❌ Deixar comprovantes acessíveis por URL pública
+
+❌ Adicionar dependência nova sem justificar
+
+❌ Reescrever algo que já funciona sem motivo explícito
+
+❌ Avançar para próxima prioridade sem confirmar que a atual está resolvida
+
+❌ Escrever valores reais de API keys ou tokens no código
+
+❌ Permitir variante sem preço no modo múltiplo (V1.1)
+
+✅ Checklist Antes de Entregar Qualquer Código
+Código comentado em português?
+
+Nomes de variáveis e funções descritivos em português?
+
+Nenhuma chave ou token hardcoded?
+
+Solução mais simples possível para o problema?
+
+Dados sensíveis do comprador protegidos?
+
+Imutabilidade dos pedidos respeitada?
+
+Arquivo no lugar certo na estrutura do projeto?
+
+Design responsivo testado em mobile? (RWD)
+
+MULTIPLICA — Juntos fazemos mais.
+Última atualização: 17 de abril de 2026
+```
