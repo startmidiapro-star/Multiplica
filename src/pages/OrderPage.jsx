@@ -38,6 +38,8 @@ const OrderPage = () => {
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [uploadError, setUploadError] = useState(false)
   const [uploadedAt, setUploadedAt] = useState(null)
+  // Feedback visual do botão "Copiar Chave Pix" — volta a false após 2s
+  const [pixCopiado, setPixCopiado] = useState(false)
 
   useEffect(() => {
     if (slug) fetchCampaign(slug)
@@ -67,6 +69,23 @@ const OrderPage = () => {
     if (!file) return
     handleFileUpload(file, orderId)
     e.target.value = ''
+  }
+
+  async function copiarChavePix() {
+    if (!campaign?.pix_key) return
+    try {
+      await navigator.clipboard.writeText(campaign.pix_key)
+    } catch {
+      // fallback para ambientes sem Clipboard API
+      const input = document.createElement('input')
+      input.value = campaign.pix_key
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+    setPixCopiado(true)
+    setTimeout(() => setPixCopiado(false), 2000)
   }
 
   const handleNewOrder = () => {
@@ -171,17 +190,23 @@ const OrderPage = () => {
                 </div>
               ) : (
                 <>
-                  <label>
-                    Quantidade
-                    <input
-                      type="number"
-                      min="1"
-                      value={form.quantity}
-                      onChange={(e) => handleChange('quantity', e.target.value)}
-                      placeholder="1"
-                      required
-                    />
-                  </label>
+                  <div className="quantity-control">
+                    <span>Quantidade</span>
+                    <div className="variant-qty-control">
+                      <button
+                        type="button"
+                        className="variant-qty-btn"
+                        onClick={() => handleChange('quantity', form.quantity - 1)}
+                        disabled={form.quantity <= 1}
+                      >−</button>
+                      <span className="variant-qty-value">{form.quantity}</span>
+                      <button
+                        type="button"
+                        className="variant-qty-btn"
+                        onClick={() => handleChange('quantity', form.quantity + 1)}
+                      >+</button>
+                    </div>
+                  </div>
 
                   {/* Dropdown de opções — exibido apenas quando a campanha tem variações */}
                   {opcoes.length > 0 && (
@@ -292,7 +317,16 @@ const OrderPage = () => {
         {/* Upload de comprovante - apenas quando pending_payment, showPix e ainda não enviou */}
         {orderStatus === 'pending_payment' && showPix && !uploadSuccess && (
           <div className="proof-upload">
-            <p><strong>Chave Pix:</strong> {campaign?.pix_key}</p>
+            <div className="pix-key-row">
+              <p className="pix-key-text"><strong>Chave Pix:</strong> {campaign?.pix_key}</p>
+              <button
+                type="button"
+                className="btn-copiar-pix"
+                onClick={copiarChavePix}
+              >
+                {pixCopiado ? '✓ Copiado!' : 'Copiar'}
+              </button>
+            </div>
             <label
               htmlFor="proof-upload"
               className={`upload-button${uploading ? ' upload-button--enviando' : ''}`}

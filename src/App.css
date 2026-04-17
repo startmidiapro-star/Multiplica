@@ -216,6 +216,19 @@
   color: var(--text);
 }
 
+/* Controle de quantidade com stepper +/- (modo sem variantes) */
+.quantity-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quantity-control > span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
 .order-form .total {
   font-size: 1.25rem;
   font-weight: 600;
@@ -376,6 +389,42 @@
   font-size: 0.95rem;
   color: var(--text-h);
   word-break: break-all;
+}
+
+/* Linha de exibição da chave Pix com botão copiar */
+.pix-key-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.pix-key-text {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text-h);
+  word-break: break-all;
+  margin: 0;
+}
+
+.btn-copiar-pix {
+  flex-shrink: 0;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-copiar-pix:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 /* Botão de upload de comprovante */
