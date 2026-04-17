@@ -50,6 +50,7 @@ export async function listarCampanhasDoOrganizador() {
  */
 export async function excluirCampanha(campanhaId) {
   // 1. Remove os pedidos vinculados (dados do comprador — LGPD)
+  //    count: 0 é válido — campanha pode não ter pedidos
   const { error: erroPedidos } = await supabase
     .from('orders')
     .delete()
@@ -61,6 +62,7 @@ export async function excluirCampanha(campanhaId) {
   }
 
   // 2. Remove as opções/variantes vinculadas
+  //    count: 0 é válido — campanha pode não ter variantes
   const { error: erroOpcoes } = await supabase
     .from('campaign_options')
     .delete()
@@ -71,15 +73,22 @@ export async function excluirCampanha(campanhaId) {
     throw new Error('Não foi possível excluir as opções da campanha.')
   }
 
-  // 3. Remove a campanha em si
-  const { error } = await supabase
+  // 3. Remove a campanha em si — usa count para detectar bloqueio silencioso de RLS.
+  //    Supabase retorna { error: null, count: 0 } quando o DELETE é bloqueado por policy,
+  //    sem lançar erro. Se count === 0, a policy DELETE não está configurada no banco.
+  const { error, count } = await supabase
     .from('campaigns')
-    .delete()
+    .delete({ count: 'exact' })
     .eq('id', campanhaId)
 
   if (error) {
     console.error('[dashboardService] excluirCampanha:', error.message)
     throw new Error('Não foi possível excluir a campanha.')
+  }
+
+  if (count === 0) {
+    console.error('[dashboardService] excluirCampanha: DELETE retornou 0 linhas — policy RLS ausente. Execute sql/rls_delete_campaigns.sql no Supabase.')
+    throw new Error('Sem permissão para excluir esta campanha. Contacte o suporte.')
   }
 }
 
