@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react'
 import { getCampaignBySlug, getOrdersByCampaign, updateOrderStatus, gerarUrlAssinadaComprovante } from '../services/adminService'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 
 export default function AdminPage() {
   const { slug } = useParams()
@@ -119,7 +120,7 @@ export default function AdminPage() {
     }
   }
 
-  if (loading) return <div className="admin-container"><p>Carregando...</p></div>
+  if (loading) return <LoadingScreen />
   if (error) return <div className="admin-container"><p className="admin-error">{error}</p></div>
   if (!campaign) return <div className="admin-container"><p>Campanha não encontrada</p></div>
 
@@ -156,10 +157,16 @@ export default function AdminPage() {
     <div className="admin-container">
       <header className="admin-header">
         <h1>📋 {campaign.name}</h1>
+        {campaign.description?.trim() && (
+          <p className="admin-header-descricao">🎯 Objetivo: {campaign.description}</p>
+        )}
         {campaign.delivery_at
           ? <p>📅 Entrega: {new Date(campaign.delivery_at).toLocaleDateString('pt-BR')}</p>
           : <p>📅 Entrega: não definida</p>
         }
+        {campaign.recipient_name?.trim() && (
+          <p className="admin-header-recebedor">🏦 Recebedor: {campaign.recipient_name}</p>
+        )}
         {campaign.contact_whatsapp?.trim() && (
           <p>📞 Contato: {campaign.contact_whatsapp}</p>
         )}

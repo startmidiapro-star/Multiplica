@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { obterSessao } from '../services/authService.js'
+import LoadingScreen from './LoadingScreen.jsx'
 
 /**
  * Envolve rotas que exigem login do organizador.
@@ -23,8 +24,8 @@ const RotaProtegida = ({ children }) => {
     })
   }, [])
 
-  // Aguarda verificação — não renderiza nada para evitar flash
-  if (verificando) return null
+  // Aguarda verificação — exibe LoadingScreen para evitar flash de conteúdo protegido
+  if (verificando) return <LoadingScreen />
 
   if (!autenticado) return <Navigate to="/login" replace />
 

@@ -11,7 +11,7 @@ export const getCampaignBySlug = async (slug) => {
   try {
     const { data, error } = await supabase
       .from('campaigns')
-      .select('id, name, slug, price, item_description, pix_key, delivery_at, contact_whatsapp, has_variants')
+      .select('id, name, slug, price, item_description, pix_key, delivery_at, contact_whatsapp, has_variants, description, recipient_name')
       .eq('slug', slug)
       .single()
 

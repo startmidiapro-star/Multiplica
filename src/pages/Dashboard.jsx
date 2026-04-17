@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listarCampanhasDoOrganizador, excluirCampanha } from '../services/dashboardService.js'
 import { sair } from '../services/authService.js'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -81,13 +82,7 @@ export default function Dashboard() {
     window.location.href = `/admin/${campanha.slug}#auth=${campanha.manager_token}`
   }
 
-  if (carregando) {
-    return (
-      <main className="page-dashboard">
-        <p className="dashboard-carregando">Carregando...</p>
-      </main>
-    )
-  }
+  if (carregando) return <LoadingScreen />
 
   if (erro) {
     return (

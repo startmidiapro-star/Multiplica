@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { CheckCircle, Clock, XCircle } from 'lucide-react'
 import { useOrder } from '../hooks/useOrder.js'
 import { formatWhatsApp } from '../utils/index.js'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 
 const OrderPage = () => {
   const { slug } = useParams()
@@ -96,13 +97,7 @@ const OrderPage = () => {
     window.location.href = `/c/${slug}`
   }
 
-  if (loading && !campaign) {
-    return (
-      <main className="page-order">
-        <p className="loading">Carregando...</p>
-      </main>
-    )
-  }
+  if (loading && !campaign) return <LoadingScreen />
 
   if (error && !campaign) {
     return (
@@ -128,6 +123,9 @@ const OrderPage = () => {
           <>
             <section className="campaign-info">
               <h1>{campaign.name}</h1>
+              {campaign.description?.trim() && (
+                <p className="campaign-description">{campaign.description}</p>
+              )}
               {campaign.item_description && (
                 <p className="campaign-item-description">{campaign.item_description}</p>
               )}
@@ -327,6 +325,9 @@ const OrderPage = () => {
                 {pixCopiado ? '✓ Copiado!' : 'Copiar'}
               </button>
             </div>
+            {campaign?.recipient_name?.trim() && (
+              <p className="pix-recebedor">✅ O valor será transferido para <strong>{campaign.recipient_name}</strong></p>
+            )}
             <label
               htmlFor="proof-upload"
               className={`upload-button${uploading ? ' upload-button--enviando' : ''}`}

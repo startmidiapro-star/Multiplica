@@ -2483,3 +2483,65 @@
     color: #fca5a5;
   }
 }
+
+/* ── LoadingScreen ─────────────────────────────────────────────────────────── */
+
+@keyframes multiplica-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 100svh;
+  padding: 24px;
+}
+
+.loading-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e0eaf8;
+  border-top-color: #5a8fdb;
+  border-radius: 50%;
+  animation: multiplica-spin 0.8s linear infinite;
+}
+
+.loading-screen-texto {
+  font-size: 1rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.loading-screen-assinatura {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* ── Campos V1.1 — description e recipient_name ────────────────────────────── */
+
+/* OrderPage: objetivo da campanha abaixo do nome */
+.campaign-description {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+/* OrderPage: recebedor do Pix abaixo da chave */
+.pix-recebedor {
+  font-size: 0.875rem;
+  color: #16a34a;
+  margin: 4px 0 0;
+}
+
+/* AdminPage: objetivo e recebedor no header */
+.admin-header-descricao,
+.admin-header-recebedor {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin: 2px 0;
+}
