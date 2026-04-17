@@ -1784,6 +1784,306 @@
   }
 }
 
+/* ── V1.1 CreateCampaign — novos estilos ── */
+
+/* Título de seção dentro do formulário */
+.create-secao-titulo {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #5a8fdb;
+  margin: 4px 0 -4px;
+}
+
+/* Dica/microcopy abaixo de um campo */
+.create-microcopy {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-top: -2px;
+}
+
+/* Textarea de descrição/motivação */
+.create-form .create-textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #ffffff;
+  color: #111827;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.create-form .create-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Seção de tipo (radio) — empilha os dois cards */
+.create-tipo-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Card de opção de radio */
+.create-tipo-opcao {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 400;
+  color: #374151;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+/* Card selecionado */
+.create-tipo-opcao:has(input:checked) {
+  border-color: #5a8fdb;
+  background: #eff6ff;
+}
+
+.create-tipo-opcao input[type="radio"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+  accent-color: #5a8fdb;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.create-tipo-opcao-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.create-tipo-opcao-texto strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.create-tipo-opcao-texto span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Painel expandido — preço único (single) */
+.create-preco-unico {
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: -2px;
+}
+
+/* Painel expandido — variantes (multiple) */
+.create-variantes-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: -2px;
+}
+
+/* Lista de variantes confirmadas */
+.create-variantes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Linha de variante confirmada (somente leitura) */
+.create-variante-linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  min-height: 44px;
+}
+
+.create-variante-nome-texto {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.create-variante-preco-texto {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a8fdb;
+  white-space: nowrap;
+}
+
+.create-variante-remover {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 13px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  min-width: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-variante-remover:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+/* Linha de inputs para nova variante */
+.create-variante-input-linha {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.create-variante-input-nome {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #111827;
+  min-height: 44px;
+}
+
+.create-variante-input-nome:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.create-variante-input-preco {
+  width: 90px;
+  flex-shrink: 0;
+  padding: 10px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #111827;
+  min-height: 44px;
+}
+
+.create-variante-input-preco:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Botão "+" para adicionar variante */
+.btn-adicionar-variante {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #5a8fdb;
+  background: transparent;
+  color: #5a8fdb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  min-height: 44px;
+}
+
+.btn-adicionar-variante:hover {
+  background: #5a8fdb;
+  color: #ffffff;
+}
+
+/* Dark mode — V1.1 */
+@media (prefers-color-scheme: dark) {
+  .create-secao-titulo { color: #7aadff; }
+  .create-microcopy { color: #94a3b8; }
+
+  .create-form .create-textarea {
+    background: #1a1f2e;
+    border-color: #374151;
+    color: #f1f5f9;
+  }
+
+  .create-tipo-opcao {
+    border-color: #374151;
+    color: #d1d5db;
+  }
+
+  .create-tipo-opcao:has(input:checked) {
+    border-color: #5a8fdb;
+    background: #1a2840;
+  }
+
+  .create-tipo-opcao-texto strong { color: #f9fafb; }
+  .create-tipo-opcao-texto span { color: #94a3b8; }
+
+  .create-preco-unico,
+  .create-variantes-secao {
+    background: #1e2130;
+    border-color: #374151;
+  }
+
+  .create-variante-linha {
+    background: #0f172a;
+    border-color: #334155;
+  }
+
+  .create-variante-nome-texto { color: #f1f5f9; }
+  .create-variante-preco-texto { color: #7aadff; }
+  .create-variante-remover { color: #6b7280; }
+
+  .create-variante-remover:hover {
+    color: #f87171;
+    background: #3b1111;
+  }
+
+  .create-variante-input-nome,
+  .create-variante-input-preco {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+
+  .btn-adicionar-variante {
+    border-color: #5a8fdb;
+    color: #7aadff;
+  }
+
+  .btn-adicionar-variante:hover {
+    background: #1e3a5f;
+    color: #93c5fd;
+  }
+}
+
 /* ── Auth (Cadastro / Login) ── */
 
 .auth-container {

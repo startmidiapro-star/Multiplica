@@ -1,7 +1,14 @@
 /**
- * MULTIPLICA — Criação de Campanha
- * Responsabilidade: Tela 1 (formulário) e Tela 2 (confirmação com links)
+ * MULTIPLICA — Criação de Campanha V1.1
+ * Responsabilidade: Formulário em 3 seções + tela de confirmação
  * Dependências: campaignService, utils
+ *
+ * V1.1 — mudanças em relação à V1.0:
+ *   - Seção 1: campos description (motivação, opcional) e itemDescription
+ *   - Seção 2: radio mutuamente exclusivo (single/multiple) com reset ao alternar
+ *   - Modo multiple: preço obrigatório por variante — sem fallback, sem herança
+ *   - Seção 3: nomeRecebedor (novo campo obrigatório)
+ *   - Data de entrega e WhatsApp agora obrigatórios
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -10,9 +17,10 @@ import { formatWhatsApp, digitsOnly } from '../utils/index.js'
 
 const estadoInicialFormulario = {
   nome: '',
+  descricao: '',
   itemDescription: '',
-  precoUnitario: '',
   chavePix: '',
+  nomeRecebedor: '',
   dataEntrega: '',
   whatsapp: '',
 }
@@ -23,14 +31,17 @@ export default function CreateCampaign() {
   const [campanhaCriada, setCampanhaCriada] = useState(null)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState(null)
-  // 'comprador' | 'admin' | null — controla feedback do botão copiar
+  // 'comprador' | 'admin' | null — feedback do botão copiar na tela de confirmação
   const [copiado, setCopiado] = useState(null)
-  // Sabores/variantes da campanha: [{name: string, price: string}]
-  // price vazio = usar o preço padrão da campanha
-  const [temVariantes, setTemVariantes] = useState(false)
-  const [variantes, setVariantes] = useState([])
-  const [novaVariante, setNovaVariante] = useState({ name: '', price: '' })
   const [aceitoTermos, setAceitoTermos] = useState(false)
+
+  // Seção 2 — tipo de campanha
+  const [tipoCampanha, setTipoCampanha] = useState('single')
+  const [precoUnitario, setPrecoUnitario] = useState('')
+  // Lista de variantes confirmadas: [{name, price}]
+  const [variantes, setVariantes] = useState([])
+  // Inputs temporários para a próxima variante a adicionar
+  const [novaVariante, setNovaVariante] = useState({ name: '', price: '' })
 
   const linkComprador = campanhaCriada
     ? `${window.location.origin}/c/${campanhaCriada.slug}`
@@ -43,12 +54,25 @@ export default function CreateCampaign() {
     setForm((prev) => ({ ...prev, [campo]: valor }))
   }
 
+  // Alterna o tipo e limpa completamente o estado da opção anterior
+  function alterarTipo(tipo) {
+    setTipoCampanha(tipo)
+    if (tipo === 'single') {
+      setVariantes([])
+      setNovaVariante({ name: '', price: '' })
+    } else {
+      setPrecoUnitario('')
+    }
+  }
+
   function adicionarVariante() {
     const name = novaVariante.name.trim()
-    if (!name) return
+    const price = novaVariante.price.trim()
+    // Preço obrigatório — sem fallback
+    if (!name || !(Number(price) > 0)) return
     // Evita duplicatas (case-insensitive)
     if (variantes.some((v) => v.name.toLowerCase() === name.toLowerCase())) return
-    setVariantes((prev) => [...prev, { name, price: novaVariante.price.trim() }])
+    setVariantes((prev) => [...prev, { name, price }])
     setNovaVariante({ name: '', price: '' })
   }
 
@@ -63,24 +87,34 @@ export default function CreateCampaign() {
     }
   }
 
-  function formularioValido() {
-    return (
-      form.nome.trim().length > 0 &&
-      form.itemDescription.trim().length > 0 &&
-      Number(form.precoUnitario) > 0 &&
-      form.chavePix.trim().length > 0
-      && aceitoTermos
-    )
+  // Retorna mensagem de erro ou null se válido
+  function validar() {
+    if (!form.nome.trim()) return 'Nome da campanha é obrigatório.'
+    if (!form.itemDescription.trim()) return 'Produto/Item é obrigatório.'
+
+    if (tipoCampanha === 'single') {
+      if (!(Number(precoUnitario) > 0)) return 'Informe o preço por unidade.'
+    } else {
+      if (variantes.length === 0) return 'Adicione pelo menos um item.'
+      if (variantes.some((v) => !(Number(v.price) > 0)))
+        return 'Todos os itens precisam ter um preço válido.'
+    }
+
+    if (!form.chavePix.trim()) return 'Chave Pix é obrigatória.'
+    if (!form.nomeRecebedor.trim()) return 'Nome do recebedor é obrigatório.'
+    if (!form.dataEntrega) return 'Data de entrega é obrigatória.'
+    if (digitsOnly(form.whatsapp).length < 10)
+      return 'WhatsApp inválido — informe DDD + número (mínimo 10 dígitos).'
+    if (!aceitoTermos)
+      return 'Você deve aceitar os Termos de Responsabilidade do Organizador.'
+    return null
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!formularioValido()) {
-      if (!aceitoTermos) {
-        setErro('Você deve aceitar os Termos de Responsabilidade do Organizador.')
-        return
-      }
-      setErro('Preencha todos os campos obrigatórios.')
+    const mensagemErro = validar()
+    if (mensagemErro) {
+      setErro(mensagemErro)
       return
     }
     setErro(null)
@@ -88,20 +122,26 @@ export default function CreateCampaign() {
     try {
       const campanha = await criarCampanha({
         nome: form.nome.trim(),
+        descricao: form.descricao.trim() || null,
         itemDescription: form.itemDescription.trim(),
-        precoUnitario: Number(form.precoUnitario),
         chavePix: form.chavePix.trim(),
-        dataEntrega: form.dataEntrega || null,
+        nomeRecebedor: form.nomeRecebedor.trim(),
+        dataEntrega: form.dataEntrega,
         whatsapp: digitsOnly(form.whatsapp) || null,
-        hasVariantes: temVariantes,
+        tipo: tipoCampanha,
+        precoUnitario: tipoCampanha === 'single' ? Number(precoUnitario) : null,
+        hasVariantes: tipoCampanha === 'multiple',
+        // Passado para popular o JSONB variants (cópia desnormalizada)
+        variantesSalvas: tipoCampanha === 'multiple' ? variantes : [],
       })
+
       if (!campanha) {
         setErro('Não foi possível criar a campanha. Tente novamente.')
         return
       }
 
-      // Insere as variantes vinculadas à campanha (mapeia name → label esperado pelo serviço)
-      if (temVariantes && variantes.length > 0) {
+      // Insere variantes na tabela campaign_options (apenas modo múltiplo)
+      if (tipoCampanha === 'multiple' && variantes.length > 0) {
         await inserirOpcoesCampanha(
           campanha.id,
           variantes.map((v) => ({ label: v.name, price: v.price }))
@@ -121,7 +161,7 @@ export default function CreateCampaign() {
     try {
       await navigator.clipboard.writeText(link)
     } catch {
-      // fallback para navegadores sem suporte à Clipboard API
+      // Fallback para ambientes sem Clipboard API
       const input = document.createElement('input')
       input.value = link
       document.body.appendChild(input)
@@ -137,6 +177,11 @@ export default function CreateCampaign() {
     setForm(estadoInicialFormulario)
     setCampanhaCriada(null)
     setErro(null)
+    setTipoCampanha('single')
+    setPrecoUnitario('')
+    setVariantes([])
+    setNovaVariante({ name: '', price: '' })
+    setAceitoTermos(false)
   }
 
   // ── Tela 2: Confirmação ──────────────────────────────────────
@@ -196,15 +241,32 @@ export default function CreateCampaign() {
         <h1>Nova campanha</h1>
 
         <form className="create-form" onSubmit={handleSubmit}>
+
+          {/* ── Seção 1: Sobre a campanha ──────────────────────── */}
+          <p className="create-secao-titulo">Sobre a campanha</p>
+
           <label>
             Nome da campanha *
             <input
               type="text"
               value={form.nome}
               onChange={(e) => handleChange('nome', e.target.value)}
-              placeholder="Ex: Bancos da Igreja"
+              placeholder="Ex: Pastelada de Outubro ou Rifa do Dia das Crianças"
               required
             />
+            <span className="create-microcopy">Use um nome que facilite sua organização.</span>
+          </label>
+
+          <label>
+            Objetivo / motivação
+            <textarea
+              className="create-textarea"
+              value={form.descricao}
+              onChange={(e) => handleChange('descricao', e.target.value)}
+              placeholder="Ex: Arrecadar fundos para a pintura da fachada da igreja."
+              rows={3}
+            />
+            <span className="create-microcopy">Conte brevemente por que as pessoas devem ajudar.</span>
           </label>
 
           <label>
@@ -213,28 +275,127 @@ export default function CreateCampaign() {
               type="text"
               value={form.itemDescription}
               onChange={(e) => handleChange('itemDescription', e.target.value)}
-              placeholder="Ex: Pastéis de Feira"
+              placeholder="Ex: Pastel, Rifas, Ingressos ou Marmitas"
               required
             />
           </label>
 
-          <div className="create-campo-preco">
-            <label>
-              Preço padrão por unidade (R$) *
+          {/* ── Seção 2: Tipo de campanha ───────────────────────── */}
+          <p className="create-secao-titulo">Tipo de campanha</p>
+
+          <div className="create-tipo-secao">
+            {/* Opção A — preço único */}
+            <label className="create-tipo-opcao">
               <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={form.precoUnitario}
-                onChange={(e) => handleChange('precoUnitario', e.target.value)}
-                placeholder="0,00"
-                required
+                type="radio"
+                name="tipoCampanha"
+                value="single"
+                checked={tipoCampanha === 'single'}
+                onChange={() => alterarTipo('single')}
               />
+              <div className="create-tipo-opcao-texto">
+                <strong>Vou vender produto de preço único</strong>
+                <span>Todos pagam o mesmo valor por unidade.</span>
+              </div>
             </label>
-            <p className="create-campo-preco-dica">
-              Aplicado automaticamente nas opções sem preço próprio definido.
-            </p>
+
+            {tipoCampanha === 'single' && (
+              <div className="create-preco-unico">
+                <label>
+                  Preço por unidade (R$) *
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={precoUnitario}
+                    onChange={(e) => setPrecoUnitario(e.target.value)}
+                    placeholder="0,00"
+                    required
+                  />
+                </label>
+              </div>
+            )}
+
+            {/* Opção B — sabores/preços diferentes */}
+            <label className="create-tipo-opcao">
+              <input
+                type="radio"
+                name="tipoCampanha"
+                value="multiple"
+                checked={tipoCampanha === 'multiple'}
+                onChange={() => alterarTipo('multiple')}
+              />
+              <div className="create-tipo-opcao-texto">
+                <strong>Produto tem sabores ou preços diferentes</strong>
+                <span>Cada item pode ter seu próprio preço.</span>
+              </div>
+            </label>
+
+            {tipoCampanha === 'multiple' && (
+              <div className="create-variantes-secao">
+
+                {/* Lista de variantes já adicionadas */}
+                {variantes.length > 0 && (
+                  <div className="create-variantes-lista">
+                    {variantes.map((variante, idx) => (
+                      <div key={idx} className="create-variante-linha">
+                        <span className="create-variante-nome-texto">{variante.name}</span>
+                        <span className="create-variante-preco-texto">
+                          R$ {Number(variante.price).toFixed(2)}
+                        </span>
+                        <button
+                          type="button"
+                          className="create-variante-remover"
+                          onClick={() => removerVariante(idx)}
+                          aria-label={`Remover ${variante.name}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Input para adicionar nova variante */}
+                <div className="create-variante-input-linha">
+                  <input
+                    type="text"
+                    className="create-variante-input-nome"
+                    value={novaVariante.name}
+                    onChange={(e) =>
+                      setNovaVariante((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    onKeyDown={handleVarianteKeyDown}
+                    placeholder="Ex: Carne"
+                    maxLength={60}
+                  />
+                  <input
+                    type="number"
+                    className="create-variante-input-preco"
+                    value={novaVariante.price}
+                    onChange={(e) =>
+                      setNovaVariante((prev) => ({ ...prev, price: e.target.value }))
+                    }
+                    onKeyDown={handleVarianteKeyDown}
+                    placeholder="R$ 0,00"
+                    min="0.01"
+                    step="0.01"
+                  />
+                  <button
+                    type="button"
+                    className="btn-adicionar-variante"
+                    onClick={adicionarVariante}
+                  >
+                    + Adicionar
+                  </button>
+                </div>
+                <p className="create-microcopy">Preço obrigatório em cada item.</p>
+              </div>
+            )}
           </div>
+
+          {/* ── Seção 3: Pagamento e contato ────────────────────── */}
+          <p className="create-secao-titulo">Pagamento e contato</p>
 
           <label>
             Chave Pix *
@@ -248,138 +409,55 @@ export default function CreateCampaign() {
           </label>
 
           <label>
-            Data de entrega
+            Nome do recebedor *
             <input
-              type="date"
-              value={form.dataEntrega}
-              onChange={(e) => handleChange('dataEntrega', e.target.value)}
+              type="text"
+              value={form.nomeRecebedor}
+              onChange={(e) => handleChange('nomeRecebedor', e.target.value)}
+              placeholder="Nome que aparecerá no banco (Ex: Paróquia São Mateus)"
+              required
             />
           </label>
 
           <label>
-            WhatsApp de contato
+            Data de entrega *
+            <input
+              type="date"
+              value={form.dataEntrega}
+              onChange={(e) => handleChange('dataEntrega', e.target.value)}
+              required
+            />
+          </label>
+
+          <label>
+            WhatsApp de contato *
             <input
               type="tel"
               value={formatWhatsApp(form.whatsapp)}
               onChange={(e) => handleChange('whatsapp', e.target.value)}
               placeholder="(00) 00000-0000"
+              required
             />
           </label>
 
-          {/* Checkbox: produto com sabores/variantes */}
-          <label className="create-variantes-checkbox-label">
-            <input
-              type="checkbox"
-              checked={temVariantes}
-              onChange={(e) => {
-                setTemVariantes(e.target.checked)
-                if (!e.target.checked) setVariantes([])
-              }}
-            />
-            Produto com sabores / variantes
-          </label>
-
-          {/* Seção de variantes — exibida apenas quando checkbox marcado */}
-          {temVariantes && (
-            <div className="create-opcoes-secao">
-              <div className="create-opcoes-input-linha">
-                <input
-                  type="text"
-                  className="create-opcao-input"
-                  value={novaVariante.name}
-                  onChange={(e) =>
-                    setNovaVariante((prev) => ({ ...prev, name: e.target.value }))
-                  }
-                  onKeyDown={handleVarianteKeyDown}
-                  placeholder="Ex: Carne"
-                  maxLength={60}
-                />
-                <input
-                  type="number"
-                  className="create-opcao-preco-input"
-                  value={novaVariante.price}
-                  onChange={(e) =>
-                    setNovaVariante((prev) => ({ ...prev, price: e.target.value }))
-                  }
-                  onKeyDown={handleVarianteKeyDown}
-                  placeholder="R$ preço"
-                  min="0"
-                  step="0.01"
-                />
-                <button
-                  type="button"
-                  className="btn-adicionar-opcao"
-                  onClick={adicionarVariante}
-                >
-                  + Adicionar sabor
-                </button>
-              </div>
-              <p className="create-opcoes-dica">
-                Deixe o preço em branco para usar o valor padrão da campanha.
-              </p>
-
-              {variantes.length > 0 && (
-                <>
-                  <div className="create-opcoes-lista">
-                    {variantes.map((variante, idx) => {
-                      const temPrecoProrio = variante.price !== ''
-                      return (
-                        <span
-                          key={idx}
-                          className={`create-opcao-tag ${temPrecoProrio ? 'create-opcao-tag--proprio' : ''}`}
-                        >
-                          {variante.name}
-                          {temPrecoProrio ? (
-                            <span className="create-opcao-tag-preco">
-                              R$ {Number(variante.price).toFixed(2)}
-                            </span>
-                          ) : (
-                            <span className="create-opcao-tag-padrao">padrão</span>
-                          )}
-                          <button
-                            type="button"
-                            className="create-opcao-remover"
-                            onClick={() => removerVariante(idx)}
-                            aria-label={`Remover ${variante.name}`}
-                          >
-                            ×
-                          </button>
-                        </span>
-                      )
-                    })}
-                  </div>
-
-                  {/* Aviso quando há mix de preços próprios e padrão */}
-                  {variantes.some((v) => v.price !== '') && (
-                    <div className="create-opcoes-aviso-preco">
-                      Sabores em laranja têm preço próprio e substituem o valor padrão
-                      {form.precoUnitario
-                        ? ` (R$ ${Number(form.precoUnitario).toFixed(2)})`
-                        : ''
-                      } apenas para aquele item.
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-
-
+          {/* ── Footer ──────────────────────────────────────────── */}
           <label className="create-termos-checkbox">
             <input
               type="checkbox"
               checked={aceitoTermos}
               onChange={(e) => setAceitoTermos(e.target.checked)}
             />
-            Li e concordo com os <a href="/legal/terms">Termos de Responsabilidade do Organizador</a>.
+            Li e concordo com os{' '}
+            <a href="/legal/terms">Termos de Responsabilidade do Organizador</a>.
           </label>
+
           {erro && <p className="create-erro">{erro}</p>}
 
           <div className="create-acoes">
             <button
               type="button"
               className="btn-voltar"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
             >
               Voltar
             </button>

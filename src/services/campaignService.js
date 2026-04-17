@@ -128,7 +128,10 @@ export const uploadProof = async (file, orderId) => {
  *
  * O manager_token é gerado pelo banco (gen_random_uuid()) — nunca pelo frontend.
  *
- * @param {object} dados - { nome, itemDescription, precoUnitario, chavePix, dataEntrega, whatsapp }
+ * V1.1: aceita description, nomeRecebedor (recipient_name), tipo (type),
+ *        precoUnitario nulo para modo múltiplo e variantesSalvas para o JSONB variants.
+ *
+ * @param {object} dados - Campos do formulário V1.1
  * @returns {Promise<object|null>} Campanha criada (com manager_token) ou null
  */
 export async function criarCampanha(dados) {
@@ -144,6 +147,11 @@ export async function criarCampanha(dados) {
     sessionStorage.setItem('multiplica_campaign_id_temp', idCampanha)
   } catch {}
 
+  // JSONB variants: cópia desnormalizada das variantes (lida por integrações futuras)
+  const variantsJson = dados.variantesSalvas
+    ? dados.variantesSalvas.map((v) => ({ name: v.name, price: Number(v.price) }))
+    : []
+
   try {
     // INSERT sem .select() — não exige policy de SELECT para retornar dados
     const { error: erroInsert } = await supabase
@@ -151,14 +159,18 @@ export async function criarCampanha(dados) {
       .insert({
         id: idCampanha,
         name: dados.nome,
+        description: dados.descricao || null,
         item_description: dados.itemDescription || null,
-        price: dados.precoUnitario,
+        price: dados.precoUnitario ?? null,
         pix_key: dados.chavePix,
+        recipient_name: dados.nomeRecebedor || null,
         delivery_at: dados.dataEntrega || null,
         contact_whatsapp: dados.whatsapp || null,
         slug,
         user_id: userId,
         has_variants: dados.hasVariantes ?? false,
+        type: dados.tipo || 'single',
+        variants: variantsJson,
       })
 
     if (erroInsert) {
