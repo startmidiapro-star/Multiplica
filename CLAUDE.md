@@ -260,7 +260,7 @@ Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações
 
 ---
 
-## 🚀 Próximos Passos Imediatos
+## 🚀 Passos executados anteriormente
 
 | Ordem | O que fazer                                                |
 | ----- | ---------------------------------------------------------- |
@@ -271,6 +271,45 @@ Resolve o caos de arrecadações feitas via WhatsApp (pastéis, rifas, doações
 | 5     | Teste de campo com usuário real                            |
 
 ---
+
+### 🔄 Tarefa atual — LoadingScreen + Campos V1.1
+
+**Passo 1 — Verificar SELECT em `getCampaignBySlug`:**
+Confirmar que `recipient_name` e `description` estão na lista de colunas
+explícitas do SELECT em `campaignService.js`. Se não estiverem, adicionar.
+
+**Passo 2 — Criar `src/components/LoadingScreen.jsx`:**
+Componente com spinner centralizado, cor `#5a8fdb`, texto "Carregando..."
+e assinatura "Multiplica — Juntos fazemos mais." Usar variáveis CSS do
+`App.css` — não usar classes Tailwind inline. Layout responsivo.
+Substituir `return <div>Carregando...</div>` por `return <LoadingScreen />`
+em: `App.jsx`, `RotaProtegida.jsx`, `OrderPage.jsx`, `AdminPage.jsx`
+e `Dashboard.jsx`.
+
+**Passo 3 — Exibir `description` na OrderPage:**
+Abaixo do `campaign.name`, adicionar subtítulo condicional:
+`{campaign.description && <p className="campaign-description">{campaign.description}</p>}`
+Usar estilo discreto — texto menor, cor secundária, itálico opcional.
+
+**Passo 4 — Exibir `recipient_name` na OrderPage:**
+Na seção onde a chave Pix é exibida, adicionar bloco de confiança condicional:
+`{campaign.recipient_name && <p>✅ O valor será transferido para <strong>{campaign.recipient_name}</strong></p>}`
+Posicionar acima da chave Pix ou acima do botão de upload.
+
+**Passo 5 — Exibir ambos no AdminPage:**
+No card de informações da campanha no topo:
+
+- `description` como "🎯 Objetivo: ..."
+- `recipient_name` como "🏦 Recebedor: ..."
+  Ambos condicionais — campanhas antigas sem esses campos continuam funcionando.
+
+**O que NÃO fazer:**
+
+- ❌ Não alterar lógica de autenticação ou aprovação/rejeição
+- ❌ Não remover estados de loading
+- ❌ Não modificar campanhas existentes
+
+## **Commit:** `feat: LoadingScreen + description e recipient_name nas páginas do comprador e admin`
 
 ## 🗺️ Roadmap V2.0 — Pós-MVP
 
